@@ -125,6 +125,10 @@ module.exports = function(grunt)
             'repository'
           ],
           overrides: {
+            main: ["js/kurento-utils.min.js"],
+            dependencies: {
+              "adapter.js": "*"
+            },
             authors: (pkg.author ? [pkg.author] : []).concat(pkg.contributors || [])
           }
         }
