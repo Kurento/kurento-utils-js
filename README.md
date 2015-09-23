@@ -31,8 +31,8 @@ Alternatively, you can download the code using git and install manually its
 dependencies:
 
 ```bash
-git clone https://github.com/Kurento/kurento-utils
-cd kurento-utils
+git clone https://github.com/Kurento/kurento-utils-js
+cd kurento-utils-js
 npm install
 ```
 
