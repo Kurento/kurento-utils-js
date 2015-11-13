@@ -30,8 +30,6 @@
   "devDependencies": {
     "bower": "~1.4.1",
     "browserify": "^10.2.4",
-    "browserify-optional": "^1.0.0",
-    "uuid": "~2.0.1",
     "coveralls": "~2.11.2",
     "fs-extra": "^0.19.0",
     "grunt": "^0.4.5",
@@ -55,12 +53,19 @@
     "xml2js": "^0.4.9"
   },
   "dependencies": {
+    "browserify-optional": "^1.0.0",
     "freeice": "^2.1.2",
     "inherits": "^2.0.1",
     "merge": "^1.2.0",
-    "ua-parser-js": "^0.7.7"
+    "ua-parser-js": "^0.7.7",
+    "uuid": "~2.0.1"
   },
   "optionalDependencies": {
     "kurento-browser-extensions": "*"
+  },
+  "browserify": {
+    "transform": [
+      "browserify-optional"
+    ]
   }
 }
