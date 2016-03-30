@@ -5,7 +5,6 @@
 bower.json
 junitResult.xml
 lcovResult.lcov
-dist/
 doc/
 lib-cov/
 node_modules/

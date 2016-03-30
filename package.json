@@ -1,27 +1,27 @@
 {
-  "name": "kurento-utils",
+  "name": "kurento-utils-temasys",
   "version": "6.4.1-dev",
-  "description": "Kurento Utilities",
+  "description": "Kurento Utilities with Temasys Plugin",
   "homepage": "http://www.kurento.org",
   "license": "LGPL-2.1",
   "author": "Kurento <info@kurento.org> (http://kurento.org)",
   "contributors": [
-    "Ivan Gracia <izanmail@gmail.com>",
-    "Jesús Leganés Combarro 'piranna' <piranna@gmail.com>"
+    "GiangNDM <giangndm@ows.vn>"
   ],
-  "main": "lib/index.js",
+  "main": "dist/kurento-utils.js",
   "repository": {
     "type": "git",
-    "url": "Kurento/kurento-utils-js"
+    "url": "owslab/kurento-utils-js"
   },
   "bugs": {
-    "url": "https://github.com/Kurento/kurento-utils-js/issues",
-    "email": "info@kurento.com"
+    "url": "https://github.com/owslab/kurento-utils-js/issues",
+    "email": "info@ows.vn"
   },
   "keywords": [
     "API",
     "Kurento",
-    "WebRTC"
+    "WebRTC",
+    "Temasys"
   ],
   "scripts": {
     "coveralls": "scripts/coveralls",
