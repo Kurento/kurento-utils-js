@@ -69,7 +69,7 @@ function setIceCandidateCallbacks(webRtcPeer, pc, onerror) {
   webRtcPeer.on('icecandidate', bufferizeCandidates(pc, function (error) {
     if (error) return onerror(error)
 
-    console.log('Received ICE candidate from WebRtcPeerRecvonly')
+    console.debug('Received ICE candidate from WebRtcPeerRecvonly')
   }))
 
   pc.addEventListener('icecandidate', function (event) {
@@ -78,7 +78,7 @@ function setIceCandidateCallbacks(webRtcPeer, pc, onerror) {
       webRtcPeer.addIceCandidate(candidate, function (error) {
         if (error) return onerror(error)
 
-        console.log('Received ICE candidate from PeerConnection:',
+        console.debug('Received ICE candidate from PeerConnection:',
           candidate)
       })
   })
@@ -314,7 +314,7 @@ QUnit.test('processOffer', function (assert) {
   function onerror(error) {
     if (error) {
       QUnit.pushFailure(error.message || error, error.stack);
-      console.trace(error)
+      console.debug(error)
     }
 
     done()
@@ -333,11 +333,12 @@ QUnit.test('processOffer', function (assert) {
     ctx.peerConnection.addStream(stream)
 
     ctx.peerConnection.createOffer(function (offer) {
-        console.log('peerConnection.createOffer')
+        console.debug('peerConnection.createOffer')
         ctx.peerConnection.setLocalDescription(offer, function () {
-            console.log('peerConnection.setLocalDescription')
-            self.processOffer(offer.sdp, function (error, sdpAnswer) {
-              console.log('self.processOffer')
+            console.debug('peerConnection.setLocalDescription')
+            self.processOffer(offer.sdp, function (error,
+              sdpAnswer) {
+              console.debug('self.processOffer')
               if (error) return onerror(error)
 
               var answer = new RTCSessionDescription({
@@ -427,7 +428,8 @@ QUnit.test('currentFrame', function (assert) {
           getUserMedia(mediaConstraints, function (stream) {
               ctx.peerConnection.addStream(stream)
 
-              ctx.peerConnection.createAnswer(function (answer) {
+              ctx.peerConnection.createAnswer(function (
+                  answer) {
                   ctx.peerConnection.setLocalDescription(
                     answer,
                     function () {
@@ -435,7 +437,8 @@ QUnit.test('currentFrame', function (assert) {
                         error) {
                         if (error) return onerror(error)
 
-                        var stream = this.getRemoteStream()
+                        var stream = this
+                          .getRemoteStream()
                         assert.notEqual(stream,
                           undefined, 'remote stream')
 
@@ -447,9 +450,11 @@ QUnit.test('currentFrame', function (assert) {
                             var currentFrame =
                               self.currentFrame
 
-                            var x = currentFrame.width /
+                            var x = currentFrame
+                              .width /
                               2
-                            var y = currentFrame.height /
+                            var y = currentFrame
+                              .height /
                               2
 
                             assert.notPixelEqual(
@@ -610,7 +615,8 @@ QUnit.test('videoEnabled', function (assert) {
         var x = video.videoWidth / 2
         var y = video.videoHeight / 2
 
-        context.drawImage(video, 0, 0, video.videoWidth, video.videoHeight)
+        context.drawImage(video, 0, 0, video.videoWidth, video
+          .videoHeight)
         assert.notPixelEqual(canvas, x, y, 0, 0, 0, 0, 'enabled');
 
         self.videoEnabled = false
