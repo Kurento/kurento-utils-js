@@ -1,6 +1,7 @@
 .classpath
 .project
 .settings/
+.vscode/
 *~
 bower.json
 junitResult.xml
@@ -13,3 +14,8 @@ src/
 target/
 npm-debug.log
 reports/
+
+# Only apps should have lockfiles, not libs/packages
+npm-shrinkwrap.json
+package-lock.json
+yarn.lock
