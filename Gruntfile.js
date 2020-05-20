@@ -44,12 +44,6 @@ module.exports = function (grunt) {
       }
     },
 
-    githooks: {
-      all: {
-        'pre-commit': 'jsbeautifier:git-pre-commit'
-      }
-    },
-
     // Generate documentation
     jsdoc: {
       all: {
@@ -177,6 +171,11 @@ module.exports = function (grunt) {
 
     // Generate browser versions and mapping debug file
     browserify: {
+      coverage: {
+        src: "lib-cov/browser.js",
+        dest: DIST_DIR + "/<%= pkg.name %>.cov.js",
+      },
+
       options: {
         transform: ["browserify-optional"]
       },
@@ -187,62 +186,56 @@ module.exports = function (grunt) {
       dest: DIST_DIR + "/<%= pkg.name %>_require.js"
     },
 
-      standalone: {
-        src: "lib/browser.js",
-        dest: DIST_DIR + "/<%= pkg.name %>.js",
+    standalone: {
+      src: "lib/browser.js",
+      dest: DIST_DIR + "/<%= pkg.name %>.js",
 
-        options: {
-          browserifyOptions: {
-            standalone: "<%= pkg.name %>"
-          }
+      options: {
+        browserifyOptions: {
+          standalone: "<%= pkg.name %>"
         }
-      },
+      }
+    },
 
-      coverage: {
-        src: "lib-cov/browser.js",
-        dest: DIST_DIR + "/<%= pkg.name %>.cov.js",
-      },
+    "require minified": {
+      src: "lib/browser.js",
+      dest: DIST_DIR + "/<%= pkg.name %>_require.min.js",
 
-      "require minified": {
-        src: "lib/browser.js",
-        dest: DIST_DIR + "/<%= pkg.name %>_require.min.js",
-
-        options: {
-          browserifyOptions: {
-            debug: true
-          },
-          plugin: [
-            [
-              "minifyify",
-              {
-                compressPath: DIST_DIR,
-                map: "<%= pkg.name %>.map"
-              }
-            ]
+      options: {
+        browserifyOptions: {
+          debug: true
+        },
+        plugin: [
+          [
+            "minifyify",
+            {
+              compressPath: DIST_DIR,
+              map: "<%= pkg.name %>.map"
+            }
           ]
-        }
-      },
+        ]
+      }
+    },
 
-      "standalone minified": {
-        src: "lib/browser.js",
-        dest: DIST_DIR + "/<%= pkg.name %>.min.js",
+    "standalone minified": {
+      src: "lib/browser.js",
+      dest: DIST_DIR + "/<%= pkg.name %>.min.js",
 
-        options: {
-          browserifyOptions: {
-            debug: true,
-            standalone: "<%= pkg.name %>"
-          },
-          plugin: [
-            [
-              "minifyify",
-              {
-                compressPath: DIST_DIR,
-                map: "<%= pkg.name %>.map",
-                output: DIST_DIR + "/<%= pkg.name %>.map"
-              }
-            ]
+      options: {
+        browserifyOptions: {
+          debug: true,
+          standalone: "<%= pkg.name %>"
+        },
+        plugin: [
+          [
+            "minifyify",
+            {
+              compressPath: DIST_DIR,
+              map: "<%= pkg.name %>.map",
+              output: DIST_DIR + "/<%= pkg.name %>.map"
+            }
           ]
-        }
+        ]
       }
     },
 
