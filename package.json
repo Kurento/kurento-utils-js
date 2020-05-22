@@ -64,7 +64,8 @@
     "merge": "^1.2.1",
     "sdp-translator": "^0.1.24",
     "ua-parser-js": "^0.7.21",
-    "uuid": "^8.1.0"
+    "uuid": "^8.1.0",
+    "webrtc-adapter": "^7.6.1"
   },
   "devDependencies": {
     "bower": "^1.8.8",
