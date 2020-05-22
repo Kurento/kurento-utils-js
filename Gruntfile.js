@@ -55,6 +55,20 @@ module.exports = function (grunt) {
       }
     },
 
+    jshint: {
+      all: ["lib/**/*.js", "test/*.js"],
+      options: {
+        curly: true,
+        indent: 2,
+        unused: true,
+        undef: true,
+        camelcase: false,
+        newcap: true,
+        node: true,
+        browser: true
+      }
+    },
+
     jsbeautifier: {
       options: {
         js: {
@@ -92,80 +106,9 @@ module.exports = function (grunt) {
     jscoverage: {
       all: {
         expand: true,
-        cwd: "lib/",
-        src: ["**/*.js"],
-        dest: "lib-cov/"
-      }
-    },
-
-    jshint: {
-      all: ["lib/**/*.js", "test/*.js"],
-      options: {
-        curly: true,
-        indent: 2,
-        unused: true,
-        undef: true,
-        camelcase: false,
-        newcap: true,
-        node: true,
-        browser: true
-      }
-    },
-
-    jsbeautifier: {
-      options: {
-        js: {
-          braceStyle: "collapse",
-          breakChainedMethods: false,
-          e4x: false,
-          evalCode: false,
-          indentChar: " ",
-          indentLevel: 0,
-          indentSize: 2,
-          indentWithTabs: false,
-          jslintHappy: true,
-          keepArrayIndentation: false,
-          keepFunctionIndentation: false,
-          maxPreserveNewlines: 2,
-          preserveNewlines: true,
-          spaceBeforeConditional: true,
-          spaceInParen: false,
-          unescapeStrings: false,
-          wrapLineLength: 80
-        }
-      },
-      "default": {
-        src: ["lib/**/*.js", "*.js", "test/*.js", "scripts/*.js"]
-      },
-      "git-pre-commit": {
-        src: ["lib/**/*.js", "*.js", "test/*.js", "scripts/*.js"],
-        options: {
-          mode: "VERIFY_ONLY"
-        }
-      }
-    },
-
-    // Generate instrumented version for coverage analisis
-    jscoverage: {
-      all: {
-        expand: true,
         cwd: 'lib/',
         src: ['**/*.js'],
         dest: 'lib-cov/'
-      }
-    },
-
-    jshint: {
-      all: ['lib/**/*.js', "test/*.js"],
-      options: {
-        "curly": true,
-        "indent": 2,
-        "unused": true,
-        "undef": true,
-        "camelcase": false,
-        "newcap": true,
-        "node": true,
-        "browser": true
       }
     },
 
