@@ -61,7 +61,6 @@
   },
   "dependencies": {
     "freeice": "^2.1.2",
-    "inherits": "^2.0.1",
     "merge": "^1.2.0",
     "sdp-translator": "^0.1.15",
     "ua-parser-js": "^0.7.7",
