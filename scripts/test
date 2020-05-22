@@ -1,17 +1,16 @@
 #!/usr/bin/env node
 
-var http = require('http')
+const http = require('http')
 
-var webdriver = require('selenium-webdriver')
-var chrome = require('selenium-webdriver/chrome')
-var firefox = require('selenium-webdriver/firefox')
+const webdriver = require('selenium-webdriver')
+const chrome = require('selenium-webdriver/chrome')
+const firefox = require('selenium-webdriver/firefox')
 
-var install    = require('bower').commands.install
-var outputFile = require('fs-extra').outputFile
-var Server     = require('node-static').Server
-var tasks      = require('grunt').tasks
-
-var parseString = require('xml2js').parseString;
+const {install}     = require('bower').commands
+const {outputFile}  = require('fs-extra')
+const {tasks}       = require('grunt')
+const {Server}      = require('node-static')
+const {parseString} = require('xml2js');
 
 // firefox options
 const profile = new firefox.Profile();
@@ -62,7 +61,7 @@ function writeReport(type, data, callback)
 
 function waitReport(driver, id, callback)
 {
-  var elem = driver.findElement({id: id})
+  const elem = driver.findElement({id: id})
 
   driver
       .wait(webdriver.until.elementIsVisible(elem), TIMEOUT*1000)
@@ -75,7 +74,7 @@ function waitReport(driver, id, callback)
 
 function runTest(browser)
 {
-  var driver = new webdriver.Builder().setFirefoxOptions(ffoptions)
+  const driver = new webdriver.Builder().setFirefoxOptions(ffoptions)
       .setChromeOptions(croptions).forBrowser(browser).build()
 
   driver.get('http://localhost:'+PORT+'/test/index.html')
@@ -89,8 +88,8 @@ function runTest(browser)
       if(error) return onerror(error)
 
       // Set process exit code if test didn't passed
-      var $ = result.testsuites.$
-      var code = parseInt($.failures) + parseInt($.errors)
+      const {$} = result.testsuites
+      const code = parseInt($.failures) + parseInt($.errors)
       if(code)
         process.exit(code)
     });
@@ -112,11 +111,11 @@ install([], undefined, {cwd: 'test'})
 
   tasks(['jsdoc', 'coverage'], {}, function()
   {
-    var file = new Server();
+    const file = new Server();
 
-    var server = http.createServer(function(request, response)
+    const server = http.createServer(function(request, response)
     {
-      var listener = file.serve.bind(file, request, response)
+      const listener = file.serve.bind(file, request, response)
 
       request.addListener('end', listener).resume()
     }).listen(PORT);
