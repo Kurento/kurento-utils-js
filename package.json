@@ -92,8 +92,5 @@
     "qunitjs": "^1.23.1",
     "selenium-webdriver": "^3.6.0",
     "xml2js": "^0.4.23"
-  },
-  "optionalDependencies": {
-    "kurento-browser-extensions": "*"
   }
 }
