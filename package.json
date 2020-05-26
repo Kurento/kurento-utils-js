@@ -54,7 +54,6 @@
     "type": "git",
     "url": "https://github.com/Kurento/kurento-utils-js.git"
   },
-  "main": "lib/index.js",
   "scripts": {
     "coveralls": "scripts/coveralls",
     "test": "scripts/test"

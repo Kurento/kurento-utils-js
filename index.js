@@ -14,6 +14,16 @@
  * limitations under the License.
  */
 
+/**
+ * This module contains a set of reusable components that have been found useful
+ * during the development of the WebRTC applications with Kurento.
+ *
+ * @module kurentoUtils
+ *
+ * @copyright 2014 Kurento (http://kurento.org/)
+ * @license ALv2
+ */
+
 const {EventEmitter} = require('events')
 
 require('webrtc-adapter')
