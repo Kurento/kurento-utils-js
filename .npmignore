@@ -1,0 +1,10 @@
+scripts/
+src/
+test/
+.browserslistrc
+.gitreview
+.jsdoc.conf.js
+Gruntfile.js
+babel.config.js
+webpack.config.js
+*.tgz

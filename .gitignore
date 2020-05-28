@@ -9,7 +9,6 @@ lcovResult.lcov
 doc/
 lib-cov/
 node_modules/
-src/
 target/
 npm-debug.log
 reports/
@@ -20,3 +19,4 @@ package-lock.json
 yarn.lock
 kurento-utils.js
 kurento-utils.js.map
+index.js

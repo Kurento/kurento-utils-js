@@ -55,8 +55,8 @@
     "url": "https://github.com/Kurento/kurento-utils-js.git"
   },
   "scripts": {
-    "build": "webpack",
     "coveralls": "scripts/coveralls",
+    "prepack": "babel src -d . && webpack",
     "test": "scripts/test"
   },
   "dependencies": {
@@ -68,6 +68,7 @@
     "webrtc-adapter": "^7.6.1"
   },
   "devDependencies": {
+    "@babel/cli": "^7.10.1",
     "@babel/core": "^7.10.1",
     "@babel/preset-env": "^7.10.1",
     "babel-loader": "^8.1.0",
