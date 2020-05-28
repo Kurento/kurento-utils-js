@@ -56,7 +56,7 @@
   },
   "scripts": {
     "coveralls": "scripts/coveralls",
-    "prepack": "babel src -d . && webpack",
+    "prepare": "babel src -d . && webpack",
     "test": "scripts/test"
   },
   "dependencies": {
