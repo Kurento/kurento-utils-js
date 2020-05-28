@@ -2,7 +2,6 @@
   "name": "kurento-utils",
   "version": "6.13.2-dev",
   "description": "Kurento JavaScript Utilities",
-  "type": "module",
   "keywords": [
     "API",
     "kurento",
@@ -56,6 +55,7 @@
     "url": "https://github.com/Kurento/kurento-utils-js.git"
   },
   "scripts": {
+    "build": "webpack",
     "coveralls": "scripts/coveralls",
     "test": "scripts/test"
   },
@@ -68,6 +68,9 @@
     "webrtc-adapter": "^7.6.1"
   },
   "devDependencies": {
+    "@babel/core": "^7.10.1",
+    "@babel/preset-env": "^7.10.1",
+    "babel-loader": "^8.1.0",
     "bower": "^1.8.8",
     "browserify": "^16.5.1",
     "browserify-optional": "^1.0.1",
@@ -91,6 +94,8 @@
     "qunit-reporter-lcov": "^1.0.2",
     "qunitjs": "^1.23.1",
     "selenium-webdriver": "^3.6.0",
+    "webpack": "^4.43.0",
+    "webpack-cli": "^3.3.11",
     "xml2js": "^0.4.23"
   }
 }

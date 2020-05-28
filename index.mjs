@@ -24,7 +24,7 @@
  * @license ALv2
  */
 
-import {EventEmitter} from 'events'
+import EventEmitter from 'events'
 
 import 'webrtc-adapter'
 
@@ -32,7 +32,9 @@ import freeice from 'freeice'
 import merge from 'merge'
 import sdpTranslator from 'sdp-translator'
 import UAParser from 'ua-parser-js'
-import {v4} from 'uuid'
+import uuid from 'uuid'
+
+const {v4} = uuide
 
 
 const recursive = merge.recursive.bind(undefined, true)

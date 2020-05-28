@@ -6,7 +6,6 @@
 bower.json
 junitResult.xml
 lcovResult.lcov
-dist/
 doc/
 lib-cov/
 node_modules/
@@ -19,3 +18,5 @@ reports/
 npm-shrinkwrap.json
 package-lock.json
 yarn.lock
+kurento-utils.js
+kurento-utils.js.map
