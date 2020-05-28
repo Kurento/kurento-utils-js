@@ -24,15 +24,15 @@
  * @license ALv2
  */
 
-const {EventEmitter} = require('events')
+import {EventEmitter} from 'events'
 
-require('webrtc-adapter')
+import 'webrtc-adapter'
 
-const freeice = require('freeice')
-const merge = require('merge')
-const sdpTranslator = require('sdp-translator')
-const UAParser = require('ua-parser-js')
-const {v4} = require('uuid')
+import freeice from 'freeice'
+import merge from 'merge'
+import sdpTranslator from 'sdp-translator'
+import UAParser from 'ua-parser-js'
+import {v4} from 'uuid'
 
 
 const recursive = merge.recursive.bind(undefined, true)
@@ -654,23 +654,30 @@ class WebRtcPeer extends EventEmitter
 // Specialized child classes
 //
 
-exports.WebRtcPeerRecvonly = class extends WebRtcPeer
+export class WebRtcPeerRecvonly extends WebRtcPeer
 {
   constructor(options) {
     super('recvonly', options)
   }
 }
 
-exports.WebRtcPeerSendonly = class extends WebRtcPeer
+export class WebRtcPeerSendonly extends WebRtcPeer
 {
   constructor(options) {
     super('sendonly', options)
   }
 }
 
-exports.WebRtcPeerSendrecv = class extends WebRtcPeer
+export class WebRtcPeerSendrecv extends WebRtcPeer
 {
   constructor(options) {
     super('sendrecv', options)
   }
+}
+
+
+export default {
+  WebRtcPeerRecvonly,
+  WebRtcPeerSendonly,
+  WebRtcPeerSendrecv
 }
