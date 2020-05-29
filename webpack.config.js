@@ -5,7 +5,7 @@ module.exports = {
   output: {
     path: __dirname,
     filename: 'kurento-utils.js',
-    library: 'kurento-utils',
+    library: 'kurentoUtils',
     libraryTarget: 'umd'
   }
 }
