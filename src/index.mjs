@@ -117,8 +117,7 @@ function getMediaEnabled(type) {
   type = type.toLowerCase()
 
   for (const track of tracks)
-    if(track.kind === type)
-      if (!enabled) return false
+    if(track.kind === type && !enabled) return false
 
   return true
 }
@@ -282,7 +281,6 @@ class WebRtcPeer extends EventEmitter
       const method = sendSource === 'webcam' ? 'getUserMedia' : 'getDisplayMedia'
 
       return navigator.mediaDevices[method](this.#mediaConstraints)
-      .then(stream => this.#videoStream = stream)
     })
     .then(this.#start)
   }
@@ -623,7 +621,9 @@ class WebRtcPeer extends EventEmitter
     this.#remoteVideo.load();
   }
 
-  #start = () => {
+  #start = stream => {
+    this.#videoStream = stream
+
     if (this.#peerConnection.connectionState === 'closed')
       throw new Error('The peer connection object is in "closed" state. ' +
         'This is most likely due to an invocation of the dispose method ' +
