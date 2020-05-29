@@ -50,7 +50,7 @@ const MEDIA_CONSTRAINTS = {
 
 // Somehow, the UAParser constructor gets an empty window object.
 // We need to pass the user agent string in order to get information
-const ua = (typeof window !== 'undefined' && window.navigator) ? window.navigator.userAgent : ''
+const ua = typeof window !== 'undefined' && window.navigator?.userAgent || ''
 const parser = new UAParser(ua)
 const {name} = parser.getBrowser()
 
@@ -411,8 +411,8 @@ class WebRtcPeer extends EventEmitter
 
     this.removeAllListeners();
 
-    if (typeof window !== 'undefined' && window.cancelChooseDesktopMedia)
-      window.cancelChooseDesktopMedia(this.#id)
+    if (typeof window !== 'undefined')
+      window?.cancelChooseDesktopMedia(this.#id)
   }
 
   generateOffer() {
