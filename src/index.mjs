@@ -182,6 +182,7 @@ class WebRtcPeer extends EventEmitter
     this.#id = id
     this.#localVideo = localVideo
     this.#mediaConstraints = mediaConstraints
+    this.#mode = mode
     this.#multistream = multistream
     this.#peerConnection = peerConnection
     this.#remoteVideo = remoteVideo
@@ -276,7 +277,7 @@ class WebRtcPeer extends EventEmitter
     this.#then = Promise.resolve()
     .then(() =>
     {
-      if (mode === 'recvonly' || this.#videoStream || this.#audioStream) return
+      if (this.#mode === 'recvonly' || this.#videoStream || this.#audioStream) return
 
       const method = sendSource === 'webcam' ? 'getUserMedia' : 'getDisplayMedia'
 
@@ -419,7 +420,7 @@ class WebRtcPeer extends EventEmitter
   }
 
   generateOffer() {
-    if (mode === 'recvonly') {
+    if (this.#mode === 'recvonly') {
       /* Add reception tracks on the RTCPeerConnection. Send tracks are
        * unconditionally added to "sendonly" and "sendrecv" modes, in the
        * constructor's "start()" method, but nothing is done for "recvonly".
@@ -581,6 +582,7 @@ class WebRtcPeer extends EventEmitter
   #dataChannel
   #localVideo
   #mediaConstraints
+  #mode
   #multistream
   #peerConnection
   #remoteVideo
