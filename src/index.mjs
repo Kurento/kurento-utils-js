@@ -391,7 +391,7 @@ class WebRtcPeer extends EventEmitter
 
       pc.close()
     } catch (err) {
-      logger.warn('Exception disposing webrtc peer ' + err)
+      logger.warn('Exception disposing webrtc peer:', err)
     }
 
     if (this.#localVideo) {
