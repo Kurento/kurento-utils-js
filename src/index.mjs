@@ -32,9 +32,7 @@ import freeice from 'freeice'
 import merge from 'merge'
 import sdpTranslator from 'sdp-translator'
 import UAParser from 'ua-parser-js'
-import uuid from 'uuid'
-
-const {v4} = uuid
+import {v4} from 'uuid'
 
 
 const recursive = merge.recursive.bind(undefined, true)
