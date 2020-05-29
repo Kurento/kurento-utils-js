@@ -34,7 +34,7 @@ import sdpTranslator from 'sdp-translator'
 import UAParser from 'ua-parser-js'
 import uuid from 'uuid'
 
-const {v4} = uuide
+const {v4} = uuid
 
 
 const recursive = merge.recursive.bind(undefined, true)
