@@ -115,7 +115,7 @@ function getMediaEnabled(type) {
   type = type.toLowerCase()
 
   for (const track of tracks)
-    if(track.kind === type && !enabled) return false
+    if(track.kind === type && !track.enabled) return false
 
   return true
 }
@@ -292,7 +292,7 @@ class WebRtcPeer extends EventEmitter
     return getMediaEnabled.call(this, 'Audio')
   }
   set audioEnabled(value) {
-    return setMediaEnabled.call(this, 'Audio', value)
+    setMediaEnabled.call(this, 'Audio', value)
   }
 
   /**
@@ -301,7 +301,7 @@ class WebRtcPeer extends EventEmitter
   get currentFrame() {
     // [ToDo] Find solution when we have a remote stream but we didn't set
     // a remoteVideo tag
-    if (!this.#remoteVideo) return;
+    if (!this.#remoteVideo) return undefined
 
     if (this.#remoteVideo.readyState < this.#remoteVideo.HAVE_CURRENT_DATA)
       throw new Error('No video stream data available')
@@ -354,7 +354,7 @@ class WebRtcPeer extends EventEmitter
     return getMediaEnabled.call(this, 'Video')
   }
   set videoEnabled(value) {
-    return setMediaEnabled.call(this, 'Video', value)
+    setMediaEnabled.call(this, 'Video', value)
   }
 
   /**
@@ -478,15 +478,15 @@ class WebRtcPeer extends EventEmitter
    * @param sdp - Description of sdpAnswer
    */
   processAnswer(sdp) {
-    const answer = new RTCSessionDescription({
+    let answer = new RTCSessionDescription({
       type: 'answer',
       sdp
     })
 
     if (this.#multistream && usePlanB) {
-      const planBAnswer = this.#interop.toPlanB(answer)
-      logger.debug('asnwer::planB', dumpSDP(planBAnswer))
-      answer = planBAnswer
+      answer = this.#interop.toPlanB(answer)
+
+      logger.debug('asnwer::planB', dumpSDP(answer))
     }
 
     logger.debug('SDP answer received, setting remote description')
@@ -513,9 +513,9 @@ class WebRtcPeer extends EventEmitter
     })
 
     if (this.#multistream && usePlanB) {
-      const planBOffer = this.#interop.toPlanB(offer)
-      logger.debug('offer::planB', dumpSDP(planBOffer))
-      offer = planBOffer
+      offer = this.#interop.toPlanB(offer)
+
+      logger.debug('offer::planB', dumpSDP(offer))
     }
 
     logger.debug('SDP offer received, setting remote description')
@@ -583,7 +583,8 @@ class WebRtcPeer extends EventEmitter
   #then
   #videoStream
 
-  #mangleSdpToAddSimulcast(answer) {
+  // TODO eslint doesn't fully support private methods, replace arrow function
+  #mangleSdpToAddSimulcast = answer => {
     if (this.#simulcast)
       if (!usePlanB)
         logger.warn('Simulcast is only available in Chrome browser.')
@@ -628,7 +629,7 @@ class WebRtcPeer extends EventEmitter
 
     function streamEndedListener() {
       self.emit('streamended', this);
-    };
+    }
 
     if (this.#videoStream && this.#localVideo) this.showLocalVideo()
 
