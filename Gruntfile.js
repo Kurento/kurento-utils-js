@@ -20,15 +20,9 @@ module.exports = function (grunt) {
 
   var pkg = grunt.file.readJSON("package.json");
 
-  var bower = {
-    TOKEN: process.env.TOKEN,
-    repository: "git://github.com/Kurento/<%= pkg.name %>-bower.git"
-  };
-
   // Project configuration.
   grunt.initConfig({
     pkg: pkg,
-    bower: bower,
 
     // Plugins configuration
     clean: {
