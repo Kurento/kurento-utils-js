@@ -34,24 +34,11 @@ module.exports = function (grunt) {
     clean: {
       generated_code: DIST_DIR,
       coverage: "lib-cov",
-
-      generated_doc: "<%= jsdoc.all.dest %>"
     },
 
     githooks: {
       all: {
         "pre-commit": "jsbeautifier:git-pre-commit"
-      }
-    },
-
-    // Generate documentation
-    jsdoc: {
-      all: {
-        src: ["package.json", "README.md", "lib/**/*.js", "test/*.js"],
-        dest: "doc/jsdoc",
-        options: {
-          configure: ".jsdoc.conf.js"
-        }
       }
     },
 
@@ -221,7 +208,6 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks("grunt-githooks");
   grunt.loadNpmTasks("grunt-jsbeautifier");
   grunt.loadNpmTasks("grunt-jscoverage");
-  grunt.loadNpmTasks("grunt-jsdoc");
   grunt.loadNpmTasks("grunt-contrib-jshint");
   grunt.loadNpmTasks("grunt-npm2bower-sync");
   grunt.loadNpmTasks("grunt-shell");
@@ -229,7 +215,6 @@ module.exports = function (grunt) {
   // Alias tasks
   grunt.registerTask("default", [
     "clean",
-    "jsdoc",
     "browserify",
     "jsbeautifier:git-pre-commit"
   ]);
