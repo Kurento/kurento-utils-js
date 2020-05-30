@@ -56,7 +56,7 @@
   },
   "scripts": {
     "coveralls": "scripts/coveralls",
-    "docs": "jsdoc package.json README.md src/index.mjs test/*.js -c .jsdoc.conf.js -d docs",
+    "docs": "jsdoc package.json README.md src/index.mjs test/*.js -c jsdoc.conf.js -d docs",
     "prepare": "babel src -d . && webpack",
     "test": "scripts/test"
   },

@@ -4,8 +4,8 @@ src/
 test/
 .browserslistrc
 .gitreview
-.jsdoc.conf.js
-Gruntfile.js
 babel.config.js
+Gruntfile.js
+jsdoc.conf.js
 webpack.config.js
 *.tgz
