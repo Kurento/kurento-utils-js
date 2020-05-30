@@ -16,8 +16,6 @@
  */
 
 module.exports = function (grunt) {
-  var DIST_DIR = "dist";
-
   var pkg = grunt.file.readJSON("package.json");
 
   // Project configuration.
@@ -25,17 +23,6 @@ module.exports = function (grunt) {
     pkg: pkg,
 
     // Plugins configuration
-    clean: {
-      generated_code: DIST_DIR,
-      coverage: "lib-cov",
-    },
-
-    githooks: {
-      all: {
-        "pre-commit": "jsbeautifier:git-pre-commit"
-      }
-    },
-
     jshint: {
       all: ["lib/**/*.js", "test/*.js"],
       options: {
@@ -95,19 +82,7 @@ module.exports = function (grunt) {
   });
 
   // Load plugins
-  grunt.loadNpmTasks("grunt-contrib-clean");
-  grunt.loadNpmTasks("grunt-githooks");
   grunt.loadNpmTasks("grunt-jsbeautifier");
   grunt.loadNpmTasks("grunt-jscoverage");
   grunt.loadNpmTasks("grunt-contrib-jshint");
-
-  // Alias tasks
-  grunt.registerTask("default", [
-    "clean",
-    "jsbeautifier:git-pre-commit"
-  ]);
-  grunt.registerTask("coverage", [
-    "clean:coverage",
-    "jscoverage",
-  ]);
 };
