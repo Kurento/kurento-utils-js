@@ -17,6 +17,6 @@ reports/
 npm-shrinkwrap.json
 package-lock.json
 yarn.lock
-kurento-utils.js
-kurento-utils.js.map
+
 index.js
+kurento-utils.*
