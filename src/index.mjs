@@ -410,9 +410,6 @@ class WebRtcPeer extends EventEmitter
     }
 
     this.removeAllListeners();
-
-    if (typeof window !== 'undefined')
-      window?.cancelChooseDesktopMedia(this.#id)
   }
 
   generateOffer() {
