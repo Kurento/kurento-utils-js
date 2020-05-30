@@ -98,130 +98,22 @@ module.exports = function (grunt) {
         dest: 'lib-cov/'
       }
     },
-
-    // Generate browser versions and mapping debug file
-    browserify: {
-      coverage: {
-        src: "lib-cov/browser.js",
-        dest: DIST_DIR + "/<%= pkg.name %>.cov.js",
-      },
-
-      options: {
-        transform: ["browserify-optional"]
-      },
-    },
-
-    require: {
-      src: "lib/browser.js",
-      dest: DIST_DIR + "/<%= pkg.name %>_require.js"
-    },
-
-    standalone: {
-      src: "lib/browser.js",
-      dest: DIST_DIR + "/<%= pkg.name %>.js",
-
-      options: {
-        browserifyOptions: {
-          standalone: "<%= pkg.name %>"
-        }
-      }
-    },
-
-    "require minified": {
-      src: "lib/browser.js",
-      dest: DIST_DIR + "/<%= pkg.name %>_require.min.js",
-
-      options: {
-        browserifyOptions: {
-          debug: true
-        },
-        plugin: [
-          [
-            "minifyify",
-            {
-              compressPath: DIST_DIR,
-              map: "<%= pkg.name %>.map"
-            }
-          ]
-        ]
-      }
-    },
-
-    "standalone minified": {
-      src: "lib/browser.js",
-      dest: DIST_DIR + "/<%= pkg.name %>.min.js",
-
-      options: {
-        browserifyOptions: {
-          debug: true,
-          standalone: "<%= pkg.name %>"
-        },
-        plugin: [
-          [
-            "minifyify",
-            {
-              compressPath: DIST_DIR,
-              map: "<%= pkg.name %>.map",
-              output: DIST_DIR + "/<%= pkg.name %>.map"
-            }
-          ]
-        ]
-      }
-    },
-
-    // Generate bower.json file from package.json data
-    sync: {
-      bower: {
-        options: {
-          sync: [
-            "name",
-            "description",
-            "license",
-            "keywords",
-            "homepage",
-            "repository"
-          ],
-          overrides: {
-            authors: (pkg.author ? [pkg.author] : []).concat(
-              pkg.contributors || []
-            )
-          }
-        }
-      }
-    },
-
-    // Publish / update package info in Bower
-    shell: {
-      bower: {
-        command: [
-          'curl -X DELETE "https://bower.herokuapp.com/packages/<%= pkg.name %>?auth_token=<%= bower.TOKEN %>"',
-          "node_modules/.bin/bower register <%= pkg.name %> <%= bower.repository %>",
-          "node_modules/.bin/bower cache clean"
-        ].join("&&")
-      }
-    }
   });
 
   // Load plugins
-  grunt.loadNpmTasks("grunt-browserify");
   grunt.loadNpmTasks("grunt-contrib-clean");
   grunt.loadNpmTasks("grunt-githooks");
   grunt.loadNpmTasks("grunt-jsbeautifier");
   grunt.loadNpmTasks("grunt-jscoverage");
   grunt.loadNpmTasks("grunt-contrib-jshint");
-  grunt.loadNpmTasks("grunt-npm2bower-sync");
-  grunt.loadNpmTasks("grunt-shell");
 
   // Alias tasks
   grunt.registerTask("default", [
     "clean",
-    "browserify",
     "jsbeautifier:git-pre-commit"
   ]);
-  grunt.registerTask("bower", ["sync:bower", "shell:bower"]);
   grunt.registerTask("coverage", [
     "clean:coverage",
     "jscoverage",
-    "browserify:coverage"
   ]);
 };
