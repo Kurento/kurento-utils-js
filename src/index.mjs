@@ -114,7 +114,7 @@ function getMediaEnabled(type) {
 
   type = type.toLowerCase()
 
-  for (const track of tracks)
+  for (const {track} of tracks)
     if(track.kind === type && !track.enabled) return false
 
   return true
@@ -123,7 +123,7 @@ function getMediaEnabled(type) {
 function setMediaEnabled(type, value) {
   type = type.toLowerCase()
 
-  for (const track of this.peerConnection.getSenders())
+  for (const {track} of this.peerConnection.getSenders())
     if(track.kind === type)
       track.enabled = value
 }
