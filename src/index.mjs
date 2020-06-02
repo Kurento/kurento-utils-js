@@ -124,12 +124,12 @@ function getFirstVideoTrack(stream)
 function getMediaEnabled(type) {
   // [ToDo] Should return undefined if not all tracks have the same value?
 
-  const tracks = this.peerConnection.getSenders()
-  if (!tracks.length) return
+  const senders = this.peerConnection.getSenders()
+  if (!senders.length) return
 
   type = type.toLowerCase()
 
-  for (const {track} of tracks)
+  for (const {track} of senders)
     if(track.kind === type && !track.enabled) return false
 
   return true
