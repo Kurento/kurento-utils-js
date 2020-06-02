@@ -67,6 +67,16 @@ function dumpSDP(description) {
   return `type: ${description.type}\r\n${description.sdp}`
 }
 
+function filterTracksType({track: {kind}})
+{
+  return this.kind === kind
+}
+
+function mapTracks(sender)
+{
+  return sender.replaceTrack(this)
+}
+
 /* Simulcast utilities */
 
 function removeFIDFromOffer(sdp) {
@@ -104,6 +114,11 @@ function getSimulcastInfo(videoStream) {
     'a=ssrc:3 label:' + id,
     ''
   ].join('\n');
+}
+
+function getFirstVideoTrack(stream)
+{
+  return stream.getVideoTracks()[0]
 }
 
 function getMediaEnabled(type) {
@@ -546,6 +561,24 @@ class WebRtcPeer extends EventEmitter
     })
   }
 
+  replaceTrack(track = null)
+  {
+    let promise
+
+    if(typeof track !== 'string')
+      promise = Promise.resolve(track)
+
+    else
+    {
+      const method = track === 'webcam' ? 'getUserMedia' : 'getDisplayMedia'
+
+      promise = navigator.mediaDevices[method](this.#mediaConstraints)
+      .then(getFirstVideoTrack)
+    }
+
+    return promise.then(this.#replaceTrack)
+  }
+
   send(data) {
     if (this.#dataChannel && this.#dataChannel.readyState === 'open') {
       this.#dataChannel.send(data)
@@ -600,6 +633,15 @@ class WebRtcPeer extends EventEmitter
       }
 
     return answer
+  }
+
+  #replaceTrack = track =>
+  {
+    let senders = this.peerConnection.getSenders()
+
+    if(track) senders = senders.filter(filterTracksType, track)
+
+    return Promise.all(senders.map(mapTracks, track))
   }
 
   #setRemoteVideo = () => {
