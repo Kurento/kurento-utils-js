@@ -608,9 +608,18 @@ class WebRtcPeer extends EventEmitter
   // TODO eslint doesn't fully support private methods, replace arrow function
   #getMedia = track =>
   {
-    const method = track === 'webcam' ? 'getUserMedia' : 'getDisplayMedia'
+    let method = 'getUserMedia'
+    let constraints = this.#mediaConstraints
 
-    return navigator.mediaDevices[method](this.#mediaConstraints)
+    if(track !== 'webcam')
+    {
+      method = 'getDisplayMedia'
+
+      // Chrome 81 don't support a `min` audio sample rate for screen sharing
+      constraints = recursive(constraints, {audio: {sampleRate: {min: undefined}}})
+    }
+
+    return navigator.mediaDevices[method](constraints)
   }
 
   // TODO eslint doesn't fully support private methods, replace arrow function
