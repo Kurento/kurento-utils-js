@@ -291,9 +291,7 @@ class WebRtcPeer extends EventEmitter
     {
       if (this.#mode === 'recvonly' || this.#videoStream || this.#audioStream) return
 
-      const method = sendSource === 'webcam' ? 'getUserMedia' : 'getDisplayMedia'
-
-      return navigator.mediaDevices[method](this.#mediaConstraints)
+      return this.#getMedia(sendSource)
     })
     .then(this.#start)
   }
@@ -563,18 +561,9 @@ class WebRtcPeer extends EventEmitter
 
   replaceTrack(track = null)
   {
-    let promise
-
-    if(typeof track !== 'string')
-      promise = Promise.resolve(track)
-
-    else
-    {
-      const method = track === 'webcam' ? 'getUserMedia' : 'getDisplayMedia'
-
-      promise = navigator.mediaDevices[method](this.#mediaConstraints)
-      .then(getFirstVideoTrack)
-    }
+    const promise = typeof track === 'string'
+                  ? this.#getMedia(track).then(getFirstVideoTrack)
+                  : Promise.resolve(track)
 
     return promise.then(this.#replaceTrack)
   }
@@ -615,6 +604,14 @@ class WebRtcPeer extends EventEmitter
   #simulcast
   #then
   #videoStream
+
+  // TODO eslint doesn't fully support private methods, replace arrow function
+  #getMedia = track =>
+  {
+    const method = track === 'webcam' ? 'getUserMedia' : 'getDisplayMedia'
+
+    return navigator.mediaDevices[method](this.#mediaConstraints)
+  }
 
   // TODO eslint doesn't fully support private methods, replace arrow function
   #mangleSdpToAddSimulcast = answer => {
