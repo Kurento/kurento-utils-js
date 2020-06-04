@@ -72,7 +72,7 @@ function filterTracksType({track: {kind}})
   return this.kind === kind
 }
 
-function mapTracks(sender)
+function replaceTrack(sender)
 {
   return sender.replaceTrack(this)
 }
@@ -289,7 +289,8 @@ class WebRtcPeer extends EventEmitter
     this.#then = Promise.resolve()
     .then(() =>
     {
-      if (this.#mode === 'recvonly' || this.#videoStream || this.#audioStream) return
+      if (this.#mode === 'recvonly' || this.#videoStream || this.#audioStream)
+        return this.#showLocalVideo()
 
       return this.#getMedia(sendSource)
     })
@@ -559,7 +560,7 @@ class WebRtcPeer extends EventEmitter
     })
   }
 
-  replaceTrack(track = null)
+  replaceTrack(track)
   {
     const promise = typeof track === 'string'
                   ? this.#getMedia(track).then(getFirstVideoTrack)
@@ -575,11 +576,6 @@ class WebRtcPeer extends EventEmitter
       logger.warn(
         'Trying to send data over a non-existing or closed data channel')
     }
-  }
-
-  showLocalVideo() {
-    this.#localVideo.srcObject = this.#videoStream
-    this.#localVideo.muted = true
   }
 
   then(onSuccess, onFailure) {
@@ -616,10 +612,18 @@ class WebRtcPeer extends EventEmitter
       method = 'getDisplayMedia'
 
       // Chrome 81 don't support a `min` audio sample rate for screen sharing
-      constraints = recursive(constraints, {audio: {sampleRate: {min: undefined}}})
+      if(constraints?.audio?.sampleRate?.min !== undefined)
+        constraints = recursive(constraints, {audio: {sampleRate: {min: undefined}}})
     }
 
     return navigator.mediaDevices[method](constraints)
+    .then(stream => {
+      this.#videoStream = stream
+
+      this.#showLocalVideo()
+
+      return stream
+    })
   }
 
   // TODO eslint doesn't fully support private methods, replace arrow function
@@ -641,13 +645,13 @@ class WebRtcPeer extends EventEmitter
     return answer
   }
 
-  #replaceTrack = track =>
+  #replaceTrack = (track = null) =>
   {
     let senders = this.peerConnection.getSenders()
 
     if(track) senders = senders.filter(filterTracksType, track)
 
-    return Promise.all(senders.map(mapTracks, track))
+    return Promise.all(senders.map(replaceTrack, track))
   }
 
   #setRemoteVideo = () => {
@@ -665,21 +669,26 @@ class WebRtcPeer extends EventEmitter
     this.#remoteVideo.load();
   }
 
-  #start = stream => {
-    this.#videoStream = stream
+  // TODO eslint doesn't fully support private methods, replace arrow function
+  #showLocalVideo = () => {
+    if (!(this.#videoStream && this.#localVideo)) return
 
+    this.#localVideo.srcObject = this.#videoStream
+    this.#localVideo.muted = true
+  }
+
+  #start = () => {
     if (this.#peerConnection.connectionState === 'closed')
-      throw new Error('The peer connection object is in "closed" state. ' +
-        'This is most likely due to an invocation of the dispose method ' +
-        'before accepting in the dialogue')
+      throw new Error('The peer connection object is in `closed` state. This ' +
+        'is most likely due to an invocation of the `dispose` method before ' +
+        'accepting in the dialogue')
 
     const self = this
 
+    // TODO maybe this can be deleted?
     function streamEndedListener() {
       self.emit('streamended', this);
     }
-
-    if (this.#videoStream && this.#localVideo) this.showLocalVideo()
 
     if (this.#videoStream) {
       this.#videoStream.addEventListener('ended', streamEndedListener);
