@@ -619,9 +619,7 @@ class WebRtcPeer extends EventEmitter
     {
       method = 'getDisplayMedia'
 
-      // Chrome 81 don't support a `min` audio sample rate for screen sharing
-      if(constraints?.audio?.sampleRate?.min !== undefined)
-        constraints = recursive(constraints, {audio: {sampleRate: {min: undefined}}})
+      constraints = recursive(constraints, {audio: false})
     }
 
     return navigator.mediaDevices[method](constraints)
