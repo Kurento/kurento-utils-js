@@ -74,7 +74,10 @@ function filterTracksType({track: {kind}})
 
 function replaceTrack(sender)
 {
+  const {track} = sender
+
   return sender.replaceTrack(this)
+  .then(track?.stop.bind(track))
 }
 
 /* Simulcast utilities */
@@ -118,7 +121,13 @@ function getSimulcastInfo(videoStream) {
 
 function getFirstVideoTrack(stream)
 {
-  return stream.getVideoTracks()[0]
+  // Ensure all video tracks except first one and all audio tracks are stopped
+  for(const track of stream.getAudioTracks()) track.stop()
+
+  const [result, tracks] = stream.getVideoTracks()
+  for(const track of tracks) track.stop()
+
+  return result
 }
 
 function getMediaEnabled(type) {
