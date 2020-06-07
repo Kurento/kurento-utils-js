@@ -124,7 +124,7 @@ function getFirstVideoTrack(stream)
   // Ensure all video tracks except first one and all audio tracks are stopped
   for(const track of stream.getAudioTracks()) track.stop()
 
-  const [result, tracks] = stream.getVideoTracks()
+  const [result, ...tracks] = stream.getVideoTracks()
   for(const track of tracks) track.stop()
 
   return result
@@ -619,7 +619,7 @@ class WebRtcPeer extends EventEmitter
     {
       method = 'getDisplayMedia'
 
-      constraints = recursive(constraints, {audio: false})
+      constraints = {...constraints, audio: false}
     }
 
     return navigator.mediaDevices[method](constraints)
