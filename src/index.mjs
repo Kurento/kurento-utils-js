@@ -501,6 +501,9 @@ class WebRtcPeer extends EventEmitter
    * @param sdp - Description of sdpAnswer
    */
   processAnswer(sdp) {
+    if (this.#peerConnection.connectionState === 'closed')
+      return Promise.reject(new Error('PeerConnection is closed'))
+
     let answer = new RTCSessionDescription({
       type: 'answer',
       sdp
@@ -513,9 +516,6 @@ class WebRtcPeer extends EventEmitter
     }
 
     logger.debug('SDP answer received, setting remote description')
-
-    if (this.#peerConnection.connectionState === 'closed')
-      return Promise.reject(new Error('PeerConnection is closed'))
 
     return this.#peerConnection.setRemoteDescription(answer)
     .then(this.#setRemoteVideo)
@@ -530,6 +530,9 @@ class WebRtcPeer extends EventEmitter
    * @param sdp - Description of sdpOffer
    */
   processOffer(sdp) {
+    if (this.#peerConnection.connectionState === 'closed')
+      return Promise.reject(new Error('PeerConnection is closed'))
+
     let offer = new RTCSessionDescription({
       type: 'offer',
       sdp
@@ -542,9 +545,6 @@ class WebRtcPeer extends EventEmitter
     }
 
     logger.debug('SDP offer received, setting remote description')
-
-    if (this.#peerConnection.connectionState === 'closed')
-      return Promise.reject(new Error('PeerConnection is closed'))
 
     return this.#peerConnection.setRemoteDescription(offer)
     .then(this.#setRemoteVideo)
@@ -579,12 +579,11 @@ class WebRtcPeer extends EventEmitter
   }
 
   send(data) {
-    if (this.#dataChannel && this.#dataChannel.readyState === 'open') {
-      this.#dataChannel.send(data)
-    } else {
-      logger.warn(
-        'Trying to send data over a non-existing or closed data channel')
-    }
+    if (this.#dataChannel?.readyState === 'open')
+      return this.#dataChannel.send(data)
+
+    logger.warn(
+      'Trying to send data over a non-existing or closed data channel')
   }
 
   then(onSuccess, onFailure) {
@@ -616,7 +615,7 @@ class WebRtcPeer extends EventEmitter
     let method = 'getUserMedia'
     let constraints = this.#mediaConstraints
 
-    if(track !== 'webcam')
+    if(track === 'screen')
     {
       method = 'getDisplayMedia'
 
