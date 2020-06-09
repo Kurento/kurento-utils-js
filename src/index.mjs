@@ -154,8 +154,8 @@ function setMediaEnabled(type, value) {
 
 
 /**
- * Wrapper object of an RTCPeerConnection. This object is aimed to simplify the
- * development of WebRTC-based applications.
+ * Wrapper object of an {RTCPeerConnection}. This object is aimed to simplify
+ * the development of WebRTC-based applications.
  */
 class WebRtcPeer extends EventEmitter
 {
@@ -164,14 +164,18 @@ class WebRtcPeer extends EventEmitter
    *
    * @param {String} mode Mode in which the PeerConnection will be configured.
    *  Valid values are: 'recv', 'send', and 'sendRecv'
-   * @param localVideo Video tag for the local stream
-   * @param remoteVideo Video tag for the remote stream
-   * @param {MediaStream} videoStream Stream to be used as primary source
-   *  (typically video and audio, or only video if combined with audioStream)
-   *  for localVideo and to be added as stream to the RTCPeerConnection
-   * @param {MediaStream} audioStream Stream to be used as second source
-   *  (typically for audio) for localVideo and to be added as stream to the
-   *  RTCPeerConnection
+   * @param {Object} [options]
+   * @param {MediaStream} [options.audioStream] Stream to be used as second
+   *  source (typically for audio) for localVideo and to be added as stream to
+   *  the {RTCPeerConnection}
+   * @param {HTMLVideoElement} [options.localVideo] Video tag for the local
+   *  stream
+   * @param {HTMLVideoElement} [options.remoteVideo] Video tag for the remote
+   *  stream
+   * @param {MediaStream} [options.videoStream] Stream to be used as primary
+   *  source (typically video and audio, or only video if combined with
+   *  audioStream) for localVideo and to be added as stream to the
+   *  {RTCPeerConnection}
    */
   constructor(
     mode,
