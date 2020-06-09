@@ -484,11 +484,11 @@ class WebRtcPeer extends EventEmitter
     })
   }
 
-  getReceivers(index) {
+  getReceiver(index) {
     return this.#peerConnection.getReceivers()[index || 0]
   }
 
-  getSenders(index) {
+  getSender(index) {
     return this.#peerConnection.getSenders()[index || 0]
   }
 
