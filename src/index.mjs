@@ -85,7 +85,7 @@ function replaceTrack(sender)
 function removeFIDFromOffer(sdp) {
   const n = sdp.indexOf("a=ssrc-group:FID");
 
-  if (!n) return sdp;
+  if (n === -1) return sdp;
 
   return sdp.slice(0, n);
 }
