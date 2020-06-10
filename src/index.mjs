@@ -226,8 +226,6 @@ class WebRtcPeer extends EventEmitter
     if (oncandidategatheringdone)
       this.on('candidategatheringdone', oncandidategatheringdone)
 
-    let candidategatheringdone = false
-
     // Init PeerConnection
     if (!this.#peerConnection) {
       this.#peerConnection = new RTCPeerConnection(peeconnectionConfiguration);
@@ -255,33 +253,9 @@ class WebRtcPeer extends EventEmitter
 
     const candidatesQueueOut = []
 
-    // If event.candidate == null, it means that candidate gathering has
-    // finished and RTCPeerConnection.iceGatheringState === "complete".
-    // Such candidate does not need to be sent to the remote peer.
-    // https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/icecandidate_event#Indicating_that_ICE_gathering_is_complete
-    this.#peerConnection.addEventListener('icecandidate', ({candidate}) => {
-      if (EventEmitter.listenerCount(this, 'icecandidate') || EventEmitter
-        .listenerCount(this, 'candidategatheringdone')) {
-        if (candidate) {
-          if (this.#multistream && usePlanB)
-            candidate = this.#interop.candidateToUnifiedPlan(candidate);
 
-          this.emit('icecandidate', candidate);
-          candidategatheringdone = false;
-        } else if (!candidategatheringdone) {
-          this.emit('candidategatheringdone');
-          candidategatheringdone = true;
-        }
-      }
 
-      // Not listening to 'icecandidate' or 'candidategatheringdone' events,
-      // queue the candidate until one of them is listened
-      else if (!candidategatheringdone) {
-        candidatesQueueOut.push(candidate);
-
-        if (!candidate) candidategatheringdone = true;
-      }
-    });
+    this.#peerConnection.addEventListener('icecandidate', this.#onIcecandidate);
 
     if(onnegotiationneeded)
       this.#peerConnection.addEventListener('negotiationneeded', onnegotiationneeded)
@@ -600,6 +574,7 @@ class WebRtcPeer extends EventEmitter
   //
 
   #audioStream
+  #candidategatheringdone
   #id  // read only
   #interop
   #dataChannel
@@ -653,6 +628,34 @@ class WebRtcPeer extends EventEmitter
       }
 
     return answer
+  }
+
+  // If event.candidate == null, it means that candidate gathering has finished
+  // and RTCPeerConnection.iceGatheringState === "complete". Such candidate does
+  // not need to be sent to the remote peer.
+  // https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/icecandidate_event#Indicating_that_ICE_gathering_is_complete
+  #onIcecandidate = ({candidate}) => {
+    if (EventEmitter.listenerCount(this, 'icecandidate') || EventEmitter
+      .listenerCount(this, 'candidategatheringdone')) {
+      if (candidate) {
+        if (this.#multistream && usePlanB)
+          candidate = this.#interop.candidateToUnifiedPlan(candidate);
+
+        this.emit('icecandidate', candidate);
+        this.#candidategatheringdone = false;
+      } else if (!this.#candidategatheringdone) {
+        this.emit('candidategatheringdone');
+        this.#candidategatheringdone = true;
+      }
+    }
+
+    // Not listening to 'icecandidate' or 'candidategatheringdone' events,
+    // queue the candidate until one of them is listened
+    else if (!this.#candidategatheringdone) {
+      this.#candidatesQueueOut.push(candidate);
+
+      if (!candidate) this.#candidategatheringdone = true;
+    }
   }
 
   #replaceTrack = (track = null) =>
