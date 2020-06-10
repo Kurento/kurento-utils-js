@@ -605,11 +605,17 @@ class WebRtcPeer extends EventEmitter
     if(this.#ontrack)
       this.#peerConnection.addEventListener('track', this.#ontrack)
 
-    const ready = this.#mode === 'recvonly' || this.#videoStream || this.#audioStream
-                ? this.#showLocalVideo()
-                : this.#getMedia(this.#sendSource)
+    let promise
+    if(this.#mode === 'recvonly' || this.#videoStream || this.#audioStream)
+    {
+      this.#showLocalVideo()
 
-    this.#ready = ready.then(this.#start)
+      promise = Promise.resolve()
+    }
+    else
+      promise = this.#getMedia(this.#sendSource)
+
+    this.#ready = promise.then(this.#start)
   }
 
   // TODO eslint doesn't fully support private methods, replace arrow function
