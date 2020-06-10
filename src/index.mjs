@@ -221,19 +221,21 @@ class WebRtcPeer extends EventEmitter
 
     this.#interop = new sdpTranslator.Interop()
 
-    const peeconnectionConfiguration = recursive({
+    this.#peerconnectionConfiguration = recursive({
       iceServers: freeice(freeiceOpts)
     },
     configuration)
 
-    if (onstreamended) this.on('streamended', onstreamended)
-    if (onicecandidate) this.on('icecandidate', onicecandidate)
+    this.on('newListener', this.#onNewListener)
+
     if (oncandidategatheringdone)
       this.on('candidategatheringdone', oncandidategatheringdone)
+    if (onicecandidate) this.on('icecandidate', onicecandidate)
+    if (onstreamended) this.on('streamended', onstreamended)
 
     // Init PeerConnection
     if (!this.#peerConnection) {
-      this.#peerConnection = new RTCPeerConnection(peeconnectionConfiguration);
+      this.#peerConnection = new RTCPeerConnection(this.#peerconnectionConfiguration);
     }
 
     this.#initPeerConnection()
@@ -543,6 +545,7 @@ class WebRtcPeer extends EventEmitter
   #onnegotiationneeded
   #ontrack
   #peerConnection
+  #peerconnectionConfiguration
   #remoteVideo
   #ready
   #sendSource
@@ -594,14 +597,13 @@ class WebRtcPeer extends EventEmitter
       this.#dataChannel.addEventListener('error', onerror)
     }
 
+    this.#peerConnection.addEventListener('connectionstatechange', this.#onConnectionStateChange)
     this.#peerConnection.addEventListener('icecandidate', this.#onIcecandidate);
 
     if(this.#onnegotiationneeded)
       this.#peerConnection.addEventListener('negotiationneeded', this.#onnegotiationneeded)
     if(this.#ontrack)
       this.#peerConnection.addEventListener('track', this.#ontrack)
-
-    this.on('newListener', this.#onNewListener)
 
     const ready = this.#mode === 'recvonly' || this.#videoStream || this.#audioStream
                 ? this.#showLocalVideo()
@@ -627,6 +629,22 @@ class WebRtcPeer extends EventEmitter
       }
 
     return answer
+  }
+
+  #onConnectionStateChange = () => {
+    switch(this.#peerConnection.connectionState) {
+      case "connected":  // The connection has become fully connected
+      case "disconnected":  // One or more transports has terminated
+      case "failed":        // unexpectedly or in an error
+        console.log(this.#peerConnection.connectionState)
+      break;
+
+      case "closed":  // The connection has been closed
+        this.#peerConnection = new RTCPeerConnection(this.#peerconnectionConfiguration);
+
+        this.#initPeerConnection()
+      break;
+    }
   }
 
   // If event.candidate == null, it means that candidate gathering has finished
