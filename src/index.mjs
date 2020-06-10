@@ -231,26 +231,26 @@ class WebRtcPeer extends EventEmitter
     // Init PeerConnection
     if (!this.#peerConnection) {
       this.#peerConnection = new RTCPeerConnection(peeconnectionConfiguration);
+    }
 
-      if (dataChannels) {
-        const {
-          id = `WebRtcPeer-${this.#id}`,
-          onbufferedamountlow,
-          onclose,
-          onerror = logger.error,
-          onmessage,
-          onopen,
-          options
-        } = dataChannelConfig
+    if (dataChannels) {
+      const {
+        id = `WebRtcPeer-${this.#id}`,
+        onbufferedamountlow,
+        onclose,
+        onerror = logger.error,
+        onmessage,
+        onopen,
+        options
+      } = dataChannelConfig
 
-        this.#dataChannel = this.#peerConnection.createDataChannel(id, options);
+      this.#dataChannel = this.#peerConnection.createDataChannel(id, options);
 
-        this.#dataChannel.addEventListener('open', onopen)
-        this.#dataChannel.addEventListener('close', onclose)
-        this.#dataChannel.addEventListener('message', onmessage)
-        this.#dataChannel.addEventListener('bufferedamountlow', onbufferedamountlow)
-        this.#dataChannel.addEventListener('error', onerror)
-      }
+      this.#dataChannel.addEventListener('open', onopen)
+      this.#dataChannel.addEventListener('close', onclose)
+      this.#dataChannel.addEventListener('message', onmessage)
+      this.#dataChannel.addEventListener('bufferedamountlow', onbufferedamountlow)
+      this.#dataChannel.addEventListener('error', onerror)
     }
 
     const candidatesQueueOut = []
