@@ -204,13 +204,18 @@ class WebRtcPeer extends EventEmitter
     super()
 
     this.#audioStream = audioStream
+    this.#dataChannelConfig = dataChannelConfig
+    this.#dataChannels = dataChannels
     this.#id = id
     this.#localVideo = localVideo
     this.#mediaConstraints = mediaConstraints
     this.#mode = mode
     this.#multistream = multistream
+    this.#onnegotiationneeded = onnegotiationneeded
+    this.#ontrack = ontrack
     this.#peerConnection = peerConnection
     this.#remoteVideo = remoteVideo
+    this.#sendSource = sendSource
     this.#simulcast = simulcast
     this.#videoStream = videoStream
 
@@ -231,45 +236,7 @@ class WebRtcPeer extends EventEmitter
       this.#peerConnection = new RTCPeerConnection(peeconnectionConfiguration);
     }
 
-    if (dataChannels) {
-      const {
-        id = `WebRtcPeer-${this.#id}`,
-        onbufferedamountlow,
-        onclose,
-        onerror = logger.error,
-        onmessage,
-        onopen,
-        options
-      } = dataChannelConfig
-
-      this.#dataChannel = this.#peerConnection.createDataChannel(id, options);
-
-      this.#dataChannel.addEventListener('open', onopen)
-      this.#dataChannel.addEventListener('close', onclose)
-      this.#dataChannel.addEventListener('message', onmessage)
-      this.#dataChannel.addEventListener('bufferedamountlow', onbufferedamountlow)
-      this.#dataChannel.addEventListener('error', onerror)
-    }
-
-
-    this.#peerConnection.addEventListener('icecandidate', this.#onIcecandidate);
-
-    if(onnegotiationneeded)
-      this.#peerConnection.addEventListener('negotiationneeded', onnegotiationneeded)
-    if(ontrack)
-      this.#peerConnection.addEventListener('track', ontrack)
-
-    this.on('newListener', this.#onNewListener)
-
-    this.#then = Promise.resolve()
-    .then(() =>
-    {
-      if (this.#mode === 'recvonly' || this.#videoStream || this.#audioStream)
-        return this.#showLocalVideo()
-
-      return this.#getMedia(sendSource)
-    })
-    .then(this.#start)
+    this.#initPeerConnection()
   }
 
 
@@ -329,6 +296,10 @@ class WebRtcPeer extends EventEmitter
 
   get peerConnection() {
     return this.#peerConnection
+  }
+
+  get ready() {
+    return this.#ready
   }
 
   get remoteSessionDescriptor() {
@@ -552,10 +523,6 @@ class WebRtcPeer extends EventEmitter
       'Trying to send data over a non-existing or closed data channel')
   }
 
-  then(onSuccess, onFailure) {
-    return this.#then.then(onSuccess, onFailure)
-  }
-
 
   //
   // Private API
@@ -564,6 +531,8 @@ class WebRtcPeer extends EventEmitter
   #audioStream
   #candidategatheringdone
   #candidatesQueueOut = []
+  #dataChannelConfig
+  #dataChannels
   #id  // read only
   #interop
   #dataChannel
@@ -571,10 +540,13 @@ class WebRtcPeer extends EventEmitter
   #mediaConstraints
   #mode
   #multistream
+  #onnegotiationneeded
+  #ontrack
   #peerConnection
   #remoteVideo
+  #ready
+  #sendSource
   #simulcast
-  #then
   #videoStream
 
   // TODO eslint doesn't fully support private methods, replace arrow function
@@ -598,6 +570,44 @@ class WebRtcPeer extends EventEmitter
 
       return stream
     })
+  }
+
+  // TODO eslint doesn't fully support private methods, replace arrow function
+  #initPeerConnection = () => {
+    if (this.#dataChannels) {
+      const {
+        id = `WebRtcPeer-${this.#id}`,
+        onbufferedamountlow,
+        onclose,
+        onerror = logger.error,
+        onmessage,
+        onopen,
+        options
+      } = this.#dataChannelConfig
+
+      this.#dataChannel = this.#peerConnection.createDataChannel(id, options);
+
+      this.#dataChannel.addEventListener('open', onopen)
+      this.#dataChannel.addEventListener('close', onclose)
+      this.#dataChannel.addEventListener('message', onmessage)
+      this.#dataChannel.addEventListener('bufferedamountlow', onbufferedamountlow)
+      this.#dataChannel.addEventListener('error', onerror)
+    }
+
+    this.#peerConnection.addEventListener('icecandidate', this.#onIcecandidate);
+
+    if(this.#onnegotiationneeded)
+      this.#peerConnection.addEventListener('negotiationneeded', this.#onnegotiationneeded)
+    if(this.#ontrack)
+      this.#peerConnection.addEventListener('track', this.#ontrack)
+
+    this.on('newListener', this.#onNewListener)
+
+    const ready = this.#mode === 'recvonly' || this.#videoStream || this.#audioStream
+                ? this.#showLocalVideo()
+                : this.#getMedia(this.#sendSource)
+
+    this.#ready = ready.then(this.#start)
   }
 
   // TODO eslint doesn't fully support private methods, replace arrow function
