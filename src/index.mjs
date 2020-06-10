@@ -251,9 +251,6 @@ class WebRtcPeer extends EventEmitter
       this.#dataChannel.addEventListener('error', onerror)
     }
 
-    const candidatesQueueOut = []
-
-
 
     this.#peerConnection.addEventListener('icecandidate', this.#onIcecandidate);
 
@@ -262,16 +259,7 @@ class WebRtcPeer extends EventEmitter
     if(ontrack)
       this.#peerConnection.addEventListener('track', ontrack)
 
-    this.on('newListener', function (event, listener) {
-      if (event !== 'icecandidate' && event !== 'candidategatheringdone') return
-
-      while (candidatesQueueOut.length) {
-        const candidate = candidatesQueueOut.shift()
-
-        if (!candidate === (event === 'candidategatheringdone'))
-          listener(candidate)
-      }
-    })
+    this.on('newListener', this.#onNewListener)
 
     this.#then = Promise.resolve()
     .then(() =>
@@ -575,6 +563,7 @@ class WebRtcPeer extends EventEmitter
 
   #audioStream
   #candidategatheringdone
+  #candidatesQueueOut = []
   #id  // read only
   #interop
   #dataChannel
@@ -665,6 +654,18 @@ class WebRtcPeer extends EventEmitter
     if(track) senders = senders.filter(filterTracksType, track)
 
     return Promise.all(senders.map(replaceTrack, track))
+  }
+
+  // TODO eslint doesn't fully support private methods, replace arrow function
+  #onNewListener = (event, listener) => {
+    const iscandidategatheringdone = event === 'candidategatheringdone'
+
+    if (iscandidategatheringdone && event !== 'icecandidate') return
+
+    let candidate
+    while ((candidate = this.#candidatesQueueOut.shift()))
+      if (!candidate === iscandidategatheringdone)
+        listener(candidate)
   }
 
   #setRemoteVideo = () => {
