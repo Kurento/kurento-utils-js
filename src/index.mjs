@@ -257,18 +257,34 @@ class WebRtcPeer extends EventEmitter
    * @member {(external:ImageData|undefined)} currentFrame
    */
   get currentFrame() {
-    // [ToDo] Find solution when we have a remote stream but we didn't set
-    // a remoteVideo tag
-    if (!this.#remoteVideo) return undefined
+    let video = this.#remoteVideo
+    if (!video) {
+      // We have a remote stream but we didn't set a remoteVideo tag
+      const receivers = this.#peerConnection.getReceivers()
+      if(!receivers.length)
+        throw new Error('No remote video stream available')
 
-    if (this.#remoteVideo.readyState < this.#remoteVideo.HAVE_CURRENT_DATA)
-      throw new Error('No video stream data available')
+      const stream = new MediaStream();
+
+      for(const {track} of receivers) stream.addTrack(track);
+
+      video = document.createElement('video')
+      video.srcObject = stream
+    }
+    else if (video.readyState < video.HAVE_CURRENT_DATA)
+      throw new Error('No remote video stream data available')
 
     const canvas = document.createElement('canvas')
-    canvas.width = this.#remoteVideo.videoWidth
-    canvas.height = this.#remoteVideo.videoHeight
+    canvas.width = video.videoWidth
+    canvas.height = video.videoHeight
 
-    canvas.getContext('2d').drawImage(this.#remoteVideo, 0, 0)
+    canvas.getContext('2d').drawImage(video, 0, 0)
+
+    if (!this.#remoteVideo) {
+      video.pause();
+      video.srcObject = null
+      video.load();
+    }
 
     return canvas
   }
