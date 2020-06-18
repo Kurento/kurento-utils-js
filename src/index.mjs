@@ -22,6 +22,9 @@
  *
  * @copyright 2014 Kurento (http://kurento.org/)
  * @license ALv2
+ *
+ * @author Jesús Leganés Combarro "piranna" (piranna@gmail.com)
+ * @since 4.2.4
  */
 
 import EventEmitter from 'events'
@@ -34,7 +37,9 @@ import merge from 'merge'
 import sdpTranslator from 'sdp-translator'
 import UAParser from 'ua-parser-js'
 import {v4} from 'uuid'
-import {MediaStream, RTCPeerConnection, RTCSessionDescription} from 'wrtc'
+import {
+  MediaStream, RTCPeerConnection, RTCSessionDescription, mediaDevices
+} from 'wrtc'
 
 
 const recursive = merge.recursive.bind(undefined, true)
@@ -346,7 +351,7 @@ class WebRtcPeer extends EventEmitter
    * @param candidate - Literal object with the ICE candidate description
    */
   addIceCandidate(candidate) {
-    logger.debug('Remote ICE candidate received', candidate)
+    // logger.debug('Remote ICE candidate received', candidate)
 
     if (this.#multistream && usePlanB)
       candidate = this.#interop.candidateToPlanB(candidate)
@@ -360,7 +365,7 @@ class WebRtcPeer extends EventEmitter
    * @function module:kurentoUtils.WebRtcPeer.prototype.dispose
    */
   dispose() {
-    logger.debug('Disposing WebRtcPeer')
+    // logger.debug('Disposing WebRtcPeer')
 
     const pc = this.#peerConnection
 
@@ -377,7 +382,6 @@ class WebRtcPeer extends EventEmitter
     if (this.#localVideo) {
       this.#localVideo.pause();
       this.#localVideo.srcObject = null;
-
       this.#localVideo.load();
       this.#localVideo.muted = false;
     }
@@ -385,7 +389,6 @@ class WebRtcPeer extends EventEmitter
     if (this.#remoteVideo) {
       this.#remoteVideo.pause();
       this.#remoteVideo.srcObject = null;
-
       this.#remoteVideo.load();
     }
 
@@ -421,15 +424,10 @@ class WebRtcPeer extends EventEmitter
     }
 
     return this.#peerConnection.createOffer()
-    .then(offer => {
-      offer = this.#mangleSdpToAddSimulcast(offer);
-      logger.debug('Created SDP offer:', offer);
-
-      return this.#peerConnection.setLocalDescription(offer);
-    })
+    .then(this.#setLocalDescription)
     .then(() => {
       let {localDescription} = this.#peerConnection;
-      logger.debug('Local description set\n', localDescription.sdp);
+      // logger.debug('Local description set\n', localDescription.sdp);
 
       if (this.#multistream && usePlanB) {
         localDescription = this.#interop.toUnifiedPlan(localDescription);
@@ -472,8 +470,6 @@ class WebRtcPeer extends EventEmitter
       logger.debug('asnwer::planB', dumpSDP(answer))
     }
 
-    logger.debug('SDP answer received, setting remote description')
-
     return this.#peerConnection.setRemoteDescription(answer)
     .then(this.#setRemoteVideo)
   }
@@ -501,17 +497,10 @@ class WebRtcPeer extends EventEmitter
       logger.debug('offer::planB', dumpSDP(offer))
     }
 
-    logger.debug('SDP offer received, setting remote description')
-
     return this.#peerConnection.setRemoteDescription(offer)
     .then(this.#setRemoteVideo)
     .then(this.#peerConnection.createAnswer.bind(this.#peerConnection))
-    .then(answer => {
-      answer = this.#mangleSdpToAddSimulcast(answer)
-      logger.debug('Created SDP answer', answer)
-
-      return this.#peerConnection.setLocalDescription(answer)
-    })
+    .then(this.#setLocalDescription)
     .then(() => {
       let {localDescription} = this.#peerConnection
 
@@ -520,7 +509,6 @@ class WebRtcPeer extends EventEmitter
         logger.debug('answer::origPlanB->UnifiedPlan', dumpSDP(
           localDescription))
       }
-      logger.debug('Local description set\n', localDescription.sdp)
 
       return localDescription.sdp
     })
@@ -583,7 +571,7 @@ class WebRtcPeer extends EventEmitter
       constraints = {...constraints, audio: false}
     }
 
-    return navigator.mediaDevices[method](constraints)
+    return mediaDevices[method](constraints)
     .then(stream => {
       this.#videoStream = stream
 
@@ -636,31 +624,12 @@ class WebRtcPeer extends EventEmitter
     this.#ready = promise.then(this.#start)
   }
 
-  // TODO eslint doesn't fully support private methods, replace arrow function
-  #mangleSdpToAddSimulcast = answer => {
-    if (this.#simulcast)
-      if (!usePlanB)
-        logger.warn('Simulcast is only available in Chrome browser.')
-
-      else {
-        logger.debug('Adding multicast info')
-
-        return new RTCSessionDescription({
-          'type': answer.type,
-          'sdp': removeFIDFromOffer(answer.sdp) + getSimulcastInfo(
-            this.#videoStream)
-        })
-      }
-
-    return answer
-  }
-
   #onConnectionStateChange = () => {
     switch(this.#peerConnection.connectionState) {
       case "connected":  // The connection has become fully connected
       case "disconnected":  // One or more transports has terminated
       case "failed":        // unexpectedly or in an error
-        console.log(this.#peerConnection.connectionState)
+        // console.debug(this.#peerConnection.connectionState)
       break;
 
       case "closed":  // The connection has been closed
@@ -699,15 +668,6 @@ class WebRtcPeer extends EventEmitter
     }
   }
 
-  #replaceTrack = (track = null) =>
-  {
-    let senders = this.peerConnection.getSenders()
-
-    if(track) senders = senders.filter(filterTracksType, track)
-
-    return Promise.all(senders.map(replaceTrack, track))
-  }
-
   // TODO eslint doesn't fully support private methods, replace arrow function
   #onNewListener = (event, listener) => {
     const iscandidategatheringdone = event === 'candidategatheringdone'
@@ -720,6 +680,34 @@ class WebRtcPeer extends EventEmitter
         listener(candidate)
   }
 
+  #replaceTrack = (track = null) =>
+  {
+    let senders = this.peerConnection.getSenders()
+
+    if(track) senders = senders.filter(filterTracksType, track)
+
+    return Promise.all(senders.map(replaceTrack, track))
+  }
+
+  // TODO eslint doesn't fully support private methods, replace arrow function
+  #setLocalDescription = localDescription => {
+    if (this.#simulcast)
+      if (!usePlanB)
+        logger.warn('Simulcast is only available in Chrome browser.')
+
+      else {
+        logger.debug('Adding multicast info')
+
+        localDescription = new RTCSessionDescription({
+          'type': localDescription.type,
+          'sdp': removeFIDFromOffer(localDescription.sdp) + getSimulcastInfo(
+            this.#videoStream)
+        })
+      }
+
+    return this.#peerConnection.setLocalDescription(localDescription)
+  }
+
   #setRemoteVideo = () => {
     if (!this.#remoteVideo) return
 
@@ -727,8 +715,6 @@ class WebRtcPeer extends EventEmitter
 
     for(const {track} of this.#peerConnection.getReceivers())
       stream.addTrack(track);
-
-    logger.debug('Remote stream:', stream)
 
     this.#remoteVideo.pause()
     this.#remoteVideo.srcObject = stream
@@ -760,14 +746,14 @@ class WebRtcPeer extends EventEmitter
       this.#videoStream.addEventListener('ended', streamEndedListener);
 
       for(const track of this.#videoStream.getTracks())
-        this.#peerConnection.addTrack(track, this.#videoStream);
+        this.#peerConnection.addTrack(track);
     }
 
     if (this.#audioStream) {
       this.#audioStream.addEventListener('ended', streamEndedListener);
 
       for(const track of this.#audioStream.getTracks())
-        this.#peerConnection.addTrack(track, this.#audioStream);
+        this.#peerConnection.addTrack(track);
     }
   }
 }
@@ -804,3 +790,6 @@ export default {
   WebRtcPeerSendonly,
   WebRtcPeerSendrecv
 }
+
+// https://github.com/Automattic/node-canvas/issues/487
+export {createCanvas}

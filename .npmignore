@@ -1,11 +1,14 @@
+coverage/
 docs/
 scripts/
 src/
+__tests__/
 test/
+testutils/
 .browserslistrc
+.eslintrc
 .gitreview
 babel.config.js
-Gruntfile.js
 jsdoc.conf.js
 webpack.config.js
 *.tgz
