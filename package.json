@@ -62,12 +62,14 @@
     "test": "scripts/test"
   },
   "dependencies": {
+    "canvas": "^2.6.1",
     "freeice": "^2.2.2",
     "merge": "^1.2.1",
     "sdp-translator": "^0.1.24",
     "ua-parser-js": "^0.7.21",
     "uuid": "^8.1.0",
-    "webrtc-adapter": "^7.6.1"
+    "webrtc-adapter": "^7.6.2",
+    "wrtc": "^0.4.5"
   },
   "devDependencies": {
     "@babel/cli": "^7.10.1",

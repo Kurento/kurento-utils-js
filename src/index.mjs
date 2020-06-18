@@ -28,11 +28,13 @@ import EventEmitter from 'events'
 
 import 'webrtc-adapter'
 
+import {createCanvas} from 'canvas'
 import freeice from 'freeice'
 import merge from 'merge'
 import sdpTranslator from 'sdp-translator'
 import UAParser from 'ua-parser-js'
 import {v4} from 'uuid'
+import {MediaStream, RTCPeerConnection, RTCSessionDescription} from 'wrtc'
 
 
 const recursive = merge.recursive.bind(undefined, true)
@@ -274,7 +276,7 @@ class WebRtcPeer extends EventEmitter
     else if (video.readyState < video.HAVE_CURRENT_DATA)
       throw new Error('No remote video stream data available')
 
-    const canvas = document.createElement('canvas')
+    const canvas = createCanvas()
     canvas.width = video.videoWidth
     canvas.height = video.videoHeight
 
