@@ -38,7 +38,7 @@ import sdpTranslator from 'sdp-translator'
 import UAParser from 'ua-parser-js'
 import {v4} from 'uuid'
 import {
-  MediaStream, RTCPeerConnection, RTCSessionDescription, mediaDevices
+  MediaStream, RTCPeerConnection, RTCSessionDescription  // , mediaDevices
 } from 'wrtc'
 
 
@@ -571,7 +571,8 @@ class WebRtcPeer extends EventEmitter
       constraints = {...constraints, audio: false}
     }
 
-    return mediaDevices[method](constraints)
+    return navigator.mediaDevices[method](constraints)
+    // return mediaDevices[method](constraints)
     .then(stream => {
       this.#videoStream = stream
 
