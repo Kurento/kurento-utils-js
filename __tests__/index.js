@@ -46,11 +46,8 @@ import {
 } from "wrtc";
 
 import {
-  createCanvas, WebRtcPeerRecvonly, WebRtcPeerSendonly, WebRtcPeerSendrecv
-} from "..";
-// import {
-//     createCanvas, WebRtcPeerRecvonly, WebRtcPeerSendonly, WebRtcPeerSendrecv
-// } from "../src/index.mjs";
+    createCanvas, WebRtcPeerRecvonly, WebRtcPeerSendonly, WebRtcPeerSendrecv
+} from "../src";
 
 import RTCAudioSourceSineWave from "../testutils/rtcaudiosourcesinewave";
 
