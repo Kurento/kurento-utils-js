@@ -59,7 +59,7 @@
     "docs": "jsdoc package.json README.md src/index.mjs test/*.js -c jsdoc.conf.js -d docs",
     "lint": "eslint src/* testutils/* __tests__/*",
     "prepare": "babel src -d . && webpack",
-    "test": "jest --coverage --notify"
+    "test": "jest"
   },
   "dependencies": {
     "canvas": "^2.6.1",
@@ -101,6 +101,7 @@
     }
   },
   "jest": {
+    "collectCoverage": true,
     "collectCoverageFrom": [
       "src/**/*.{js,jsx,mjs}"
     ]
