@@ -568,12 +568,22 @@ class WebRtcPeer extends EventEmitter
     {
       method = 'getDisplayMedia'
 
-      constraints = {...constraints, audio: false}
+      constraints = {audio: false, video: true}
     }
 
     return navigator.mediaDevices[method](constraints)
     // return mediaDevices[method](constraints)
     .then(stream => {
+      if(this.#videoStream)
+      {
+        for(const track of this.#videoStream.getVideoTracks())
+          track.stop();
+
+        if(track === 'screen')
+          for(const track of this.#videoStream.getAudioTracks())
+            stream.addTrack(track);
+      }
+
       this.#videoStream = stream
 
       this.#showLocalVideo()
