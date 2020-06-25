@@ -54,6 +54,7 @@ You can use the browser version by adding the next `script` tag:
 
 * [Bertrand CHEVRIER](https://github.com/krampstudio) for
   [grunt-jsdoc](https://github.com/krampstudio/grunt-jsdoc) (not used anymore)
+* [CPI Technologies GmbH](https://cpitech.io/) for sponsoring
 
 ## About Kurento
 
