@@ -640,11 +640,12 @@ class WebRtcPeer extends EventEmitter
   }
 
   #onConnectionStateChange = () => {
+    this.#logger.debug('onConnectionStateChange', this.#peerConnection.connectionState)
+
     switch(this.#peerConnection.connectionState) {
       case "connected":  // The connection has become fully connected
       case "disconnected":  // One or more transports has terminated
       case "failed":        // unexpectedly or in an error
-        // console.debug(this.#peerConnection.connectionState)
       break;
 
       case "closed":  // The connection has been closed
@@ -660,6 +661,8 @@ class WebRtcPeer extends EventEmitter
   // not need to be sent to the remote peer.
   // https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/icecandidate_event#Indicating_that_ICE_gathering_is_complete
   #onIcecandidate = ({candidate}) => {
+    this.#logger.debug('onIcecandidate', candidate)
+
     if (EventEmitter.listenerCount(this, 'icecandidate') || EventEmitter
       .listenerCount(this, 'candidategatheringdone')) {
       if (candidate) {
