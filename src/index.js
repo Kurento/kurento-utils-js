@@ -44,8 +44,6 @@ import {
 
 const recursive = merge.recursive.bind(undefined, true)
 
-const logger = typeof window !== 'undefined' && window.Logger || console
-
 
 const MEDIA_CONSTRAINTS = {
   audio: true,
@@ -62,7 +60,6 @@ const parser = new UAParser(ua)
 const {name} = parser.getBrowser()
 
 const usePlanB = name === 'Chrome' || name === 'Chromium'
-if (usePlanB) logger.debug(name + ": using SDP PlanB")
 
 
 /**
@@ -95,35 +92,6 @@ function removeFIDFromOffer(sdp) {
   if (n === -1) return sdp;
 
   return sdp.slice(0, n);
-}
-
-function getSimulcastInfo(videoStream) {
-  const videoTracks = videoStream.getVideoTracks();
-
-  if (!videoTracks.length) {
-    logger.warn('No video tracks available in the video stream')
-    return ''
-  }
-
-  const [{id}] = videoTracks
-
-  return [
-    'a=x-google-flag:conference',
-    'a=ssrc-group:SIM 1 2 3',
-    'a=ssrc:1 cname:localVideo',
-    'a=ssrc:1 msid:' + videoStream.id + ' ' + id,
-    'a=ssrc:1 mslabel:' + videoStream.id,
-    'a=ssrc:1 label:' + id,
-    'a=ssrc:2 cname:localVideo',
-    'a=ssrc:2 msid:' + videoStream.id + ' ' + id,
-    'a=ssrc:2 mslabel:' + videoStream.id,
-    'a=ssrc:2 label:' + id,
-    'a=ssrc:3 cname:localVideo',
-    'a=ssrc:3 msid:' + videoStream.id + ' ' + id,
-    'a=ssrc:3 mslabel:' + videoStream.id,
-    'a=ssrc:3 label:' + id,
-    ''
-  ].join('\n');
 }
 
 function getFirstVideoTrack(stream)
@@ -194,6 +162,7 @@ class WebRtcPeer extends EventEmitter
       freeice: freeiceOpts,
       id = v4(),
       localVideo,
+      logger = console,
       mediaConstraints = MEDIA_CONSTRAINTS,
       multistream,
       oncandidategatheringdone,
@@ -215,6 +184,7 @@ class WebRtcPeer extends EventEmitter
     this.#dataChannels = dataChannels
     this.#id = id
     this.#localVideo = localVideo
+    this.#logger = logger
     this.#mediaConstraints = mediaConstraints
     this.#mode = mode
     this.#multistream = multistream
@@ -232,6 +202,8 @@ class WebRtcPeer extends EventEmitter
       iceServers: freeice(freeiceOpts)
     },
     configuration)
+
+    if (usePlanB) this.#logger.debug(name + ": using SDP PlanB")
 
     this.on('newListener', this.#onNewListener)
 
@@ -351,7 +323,7 @@ class WebRtcPeer extends EventEmitter
    * @param candidate - Literal object with the ICE candidate description
    */
   addIceCandidate(candidate) {
-    // logger.debug('Remote ICE candidate received', candidate)
+    this.#logger.debug('Remote ICE candidate received', candidate)
 
     if (this.#multistream && usePlanB)
       candidate = this.#interop.candidateToPlanB(candidate)
@@ -365,7 +337,7 @@ class WebRtcPeer extends EventEmitter
    * @function module:kurentoUtils.WebRtcPeer.prototype.dispose
    */
   dispose() {
-    // logger.debug('Disposing WebRtcPeer')
+    this.#logger.debug('Disposing WebRtcPeer')
 
     const pc = this.#peerConnection
 
@@ -376,7 +348,7 @@ class WebRtcPeer extends EventEmitter
 
       pc.close()
     } catch (err) {
-      logger.warn('Exception disposing webrtc peer:', err)
+      this.#logger.warn('Exception disposing webrtc peer:', err)
     }
 
     if (this.#localVideo) {
@@ -427,11 +399,11 @@ class WebRtcPeer extends EventEmitter
     .then(this.#setLocalDescription)
     .then(() => {
       let {localDescription} = this.#peerConnection;
-      // logger.debug('Local description set\n', localDescription.sdp);
+      this.#logger.debug('Local description set\n', localDescription.sdp);
 
       if (this.#multistream && usePlanB) {
         localDescription = this.#interop.toUnifiedPlan(localDescription);
-        logger.debug('offer::origPlanB->UnifiedPlan', dumpSDP(
+        this.#logger.debug('offer::origPlanB->UnifiedPlan', dumpSDP(
           localDescription));
       }
 
@@ -467,7 +439,7 @@ class WebRtcPeer extends EventEmitter
     if (this.#multistream && usePlanB) {
       answer = this.#interop.toPlanB(answer)
 
-      logger.debug('asnwer::planB', dumpSDP(answer))
+      this.#logger.debug('asnwer::planB', dumpSDP(answer))
     }
 
     return this.#peerConnection.setRemoteDescription(answer)
@@ -494,7 +466,7 @@ class WebRtcPeer extends EventEmitter
     if (this.#multistream && usePlanB) {
       offer = this.#interop.toPlanB(offer)
 
-      logger.debug('offer::planB', dumpSDP(offer))
+      this.#logger.debug('offer::planB', dumpSDP(offer))
     }
 
     return this.#peerConnection.setRemoteDescription(offer)
@@ -506,7 +478,8 @@ class WebRtcPeer extends EventEmitter
 
       if (this.#multistream && usePlanB) {
         localDescription = this.#interop.toUnifiedPlan(localDescription)
-        logger.debug('answer::origPlanB->UnifiedPlan', dumpSDP(
+
+        this.#logger.debug('answer::origPlanB->UnifiedPlan', dumpSDP(
           localDescription))
       }
 
@@ -527,7 +500,7 @@ class WebRtcPeer extends EventEmitter
     if (this.#dataChannel?.readyState === 'open')
       return this.#dataChannel.send(data)
 
-    logger.warn(
+    this.#logger.warn(
       'Trying to send data over a non-existing or closed data channel')
   }
 
@@ -545,6 +518,7 @@ class WebRtcPeer extends EventEmitter
   #interop
   #dataChannel
   #localVideo
+  #logger
   #mediaConstraints
   #mode
   #multistream
@@ -593,13 +567,43 @@ class WebRtcPeer extends EventEmitter
   }
 
   // TODO eslint doesn't fully support private methods, replace arrow function
+  #getSimulcastInfo = videoStream => {
+    const videoTracks = videoStream.getVideoTracks();
+
+    if (!videoTracks.length) {
+      this.#logger.warn('No video tracks available in the video stream')
+      return ''
+    }
+
+    const [{id}] = videoTracks
+
+    return [
+      'a=x-google-flag:conference',
+      'a=ssrc-group:SIM 1 2 3',
+      'a=ssrc:1 cname:localVideo',
+      'a=ssrc:1 msid:' + videoStream.id + ' ' + id,
+      'a=ssrc:1 mslabel:' + videoStream.id,
+      'a=ssrc:1 label:' + id,
+      'a=ssrc:2 cname:localVideo',
+      'a=ssrc:2 msid:' + videoStream.id + ' ' + id,
+      'a=ssrc:2 mslabel:' + videoStream.id,
+      'a=ssrc:2 label:' + id,
+      'a=ssrc:3 cname:localVideo',
+      'a=ssrc:3 msid:' + videoStream.id + ' ' + id,
+      'a=ssrc:3 mslabel:' + videoStream.id,
+      'a=ssrc:3 label:' + id,
+      ''
+    ].join('\n');
+  }
+
+  // TODO eslint doesn't fully support private methods, replace arrow function
   #initPeerConnection = () => {
     if (this.#dataChannels) {
       const {
         id = `WebRtcPeer-${this.#id}`,
         onbufferedamountlow,
         onclose,
-        onerror = logger.error,
+        onerror = this.#logger.error,
         onmessage,
         onopen,
         options
@@ -704,14 +708,14 @@ class WebRtcPeer extends EventEmitter
   #setLocalDescription = localDescription => {
     if (this.#simulcast)
       if (!usePlanB)
-        logger.warn('Simulcast is only available in Chrome browser.')
+        this.#logger.warn('Simulcast is only available in Chrome browser.')
 
       else {
-        logger.debug('Adding multicast info')
+        this.#logger.debug('Adding multicast info')
 
         localDescription = new RTCSessionDescription({
           'type': localDescription.type,
-          'sdp': removeFIDFromOffer(localDescription.sdp) + getSimulcastInfo(
+          'sdp': removeFIDFromOffer(localDescription.sdp) + this.#getSimulcastInfo(
             this.#videoStream)
         })
       }
