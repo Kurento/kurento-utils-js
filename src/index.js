@@ -401,6 +401,7 @@ class WebRtcPeer extends EventEmitter
 
       if (this.#multistream && usePlanB) {
         localDescription = this.#interop.toUnifiedPlan(localDescription);
+
         this.#logger.debug('offer::origPlanB->UnifiedPlan', dumpSDP(
           localDescription));
       }
@@ -570,6 +571,7 @@ class WebRtcPeer extends EventEmitter
 
     if (!videoTracks.length) {
       this.#logger.warn('No video tracks available in the video stream')
+
       return ''
     }
 
@@ -715,8 +717,8 @@ class WebRtcPeer extends EventEmitter
         this.#logger.debug('Adding multicast info')
 
         localDescription = new RTCSessionDescription({
-          'type': localDescription.type,
-          'sdp': removeFIDFromOffer(localDescription.sdp) + this.#getSimulcastInfo(
+          type: localDescription.type,
+          sdp: removeFIDFromOffer(localDescription.sdp) + this.#getSimulcastInfo(
             this.#videoStream)
         })
       }
