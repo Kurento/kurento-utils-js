@@ -51,9 +51,14 @@ import {
 
 import RTCAudioSourceSineWave from "../testutils/rtcaudiosourcesinewave";
 
+const logger = {
+  debug(){},
+  warn(){}
+}
+
 function setIceCandidateCallbacks(webRtcPeer, pc) {
   pc.addEventListener("icecandidate", function ({ candidate }) {
-    if (candidate) webRtcPeer.addIceCandidate(candidate).catch(console.warn);
+    if (candidate) webRtcPeer.addIceCandidate(candidate).catch(logger.warn);
   });
 }
 
@@ -92,6 +97,7 @@ describe("Child classes", function () {
       configuration: {
         iceServers: [],
       },
+      logger
     };
 
     webRtcPeer = new WebRtcPeerRecvonly(options);
@@ -143,6 +149,7 @@ describe("Child classes", function () {
       configuration: {
         iceServers: [],
       },
+      logger
     };
 
     webRtcPeer = new WebRtcPeerSendonly(options);
@@ -197,6 +204,7 @@ describe("Child classes", function () {
       configuration: {
         iceServers: [],
       },
+      logger
     };
 
     webRtcPeer = new WebRtcPeerSendrecv(options);
@@ -252,7 +260,7 @@ describe("Methods", function () {
   test("processOffer", function () {
     expect.assertions(1);
 
-    webRtcPeer = new WebRtcPeerRecvonly();
+    webRtcPeer = new WebRtcPeerRecvonly({logger});
     peerConnection = new RTCPeerConnection();
     setIceCandidateCallbacks(webRtcPeer, peerConnection);
 
@@ -293,6 +301,7 @@ describe("Properties", function () {
       configuration: {
         iceServers: [],
       },
+      logger,
       remoteVideo: video,
     };
 
@@ -379,6 +388,7 @@ describe("Properties", function () {
       configuration: {
         iceServers: [],
       },
+      logger
     };
 
     webRtcPeer = new WebRtcPeerSendonly(options);
@@ -410,6 +420,7 @@ describe("Properties", function () {
       configuration: {
         iceServers: [],
       },
+      logger
     };
 
     webRtcPeer = new WebRtcPeerSendonly(options);
@@ -441,6 +452,7 @@ describe("Properties", function () {
         iceServers: [],
       },
       localVideo: video,
+      logger,
       mediaConstraints: {
         audio: false,
         video: true,
