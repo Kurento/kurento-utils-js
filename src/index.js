@@ -344,8 +344,6 @@ class WebRtcPeer extends EventEmitter
     if (pc.connectionState === 'closed') return
 
     try {
-      for(const {track} of pc.getSenders()) track?.stop()
-
       pc.close()
     } catch (err) {
       this.#logger.warn('Exception disposing webrtc peer:', err)
