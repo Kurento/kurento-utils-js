@@ -84,6 +84,11 @@ function replaceTrack(sender)
   .then(track?.stop.bind(track))
 }
 
+function replaceTracks(track)
+{
+  return this.filter(filterTracksType, track).map(replaceTrack, track)
+}
+
 /* Simulcast utilities */
 
 function removeFIDFromOffer(sdp) {
@@ -484,6 +489,23 @@ class WebRtcPeer extends EventEmitter
 
       return localDescription.sdp
     })
+  }
+
+  replaceStream(stream)
+  {
+    // Replace local video
+    if(this.#videoStream)
+      for(const track of this.#videoStream.getTracks())
+        track.stop();
+
+    this.#videoStream = stream
+
+    this.#showLocalVideo()
+
+    // Replace senders
+    const senders = this.peerConnection.getSenders()
+
+    return Promise.all(stream.getTracks().flatMap(replaceTracks, senders))
   }
 
   replaceTrack(track)
