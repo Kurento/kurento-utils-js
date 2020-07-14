@@ -28,6 +28,10 @@
  */
 
 import {createCanvas, WebRtcPeer} from './WebRtcPeer'
+import WebRtcPeerCore from './WebRtcPeerCore'
+
+
+export {WebRtcPeer, WebRtcPeerCore}
 
 
 //
@@ -57,10 +61,13 @@ export class WebRtcPeerSendrecv extends WebRtcPeer
 
 
 export default {
+  WebRtcPeer,
+  WebRtcPeerCore,
   WebRtcPeerRecvonly,
   WebRtcPeerSendonly,
   WebRtcPeerSendrecv
 }
+
 
 // https://github.com/Automattic/node-canvas/issues/487
 export {createCanvas}
