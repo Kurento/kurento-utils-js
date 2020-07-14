@@ -55,10 +55,12 @@
     "url": "https://github.com/Kurento/kurento-utils-js.git"
   },
   "scripts": {
+    "build": "webpack",
     "coveralls": "scripts/coveralls",
-    "docs": "jsdoc package.json README.md src/index.mjs test/*.js -c jsdoc.conf.js -d docs",
+    "docs": "jsdoc package.json README.md src/*.js test/*.js -c jsdoc.conf.js -d docs",
     "lint": "eslint src/* testutils/* __tests__/*",
-    "prepare": "babel src -d . && webpack",
+    "prepare": "babel src -d . && npm run build",
+    "pretest": "npm run lint",
     "test": "jest"
   },
   "dependencies": {
@@ -103,7 +105,7 @@
   "jest": {
     "collectCoverage": true,
     "collectCoverageFrom": [
-      "src/**/*.{js,jsx,mjs}"
+      "src/**/*.js"
     ]
   }
 }
