@@ -17,6 +17,7 @@ npm-shrinkwrap.json
 package-lock.json
 yarn.lock
 
-/index.js
-/kurento-utils.*
 coverage/
+/index.js
+/WebRtcPeer*
+/kurento-utils.*
