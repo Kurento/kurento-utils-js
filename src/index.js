@@ -38,25 +38,19 @@ export {WebRtcPeer, WebRtcPeerCore}
 // Specialized child classes
 //
 
-export class WebRtcPeerRecvonly extends WebRtcPeer
+export function WebRtcPeerRecvonly(options, callback)
 {
-  constructor(options) {
-    super('recvonly', options)
-  }
+  return new WebRtcPeer('recvonly', options, callback)
 }
 
-export class WebRtcPeerSendonly extends WebRtcPeer
+export function WebRtcPeerSendonly(options, callback)
 {
-  constructor(options) {
-    super('sendonly', options)
-  }
+  return new WebRtcPeer('sendonly', options, callback)
 }
 
-export class WebRtcPeerSendrecv extends WebRtcPeer
+export function WebRtcPeerSendrecv(options, callback)
 {
-  constructor(options) {
-    super('sendrecv', options)
-  }
+  return new WebRtcPeer('sendrecv', options, callback)
 }
 
 

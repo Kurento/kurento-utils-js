@@ -50,6 +50,14 @@ const MEDIA_CONSTRAINTS = {
 }
 
 
+function asCallback(promise, callback)
+{
+  if(callback) return promise.then(callback.bind(null, null), callback)
+
+  return promise
+}
+
+
 /**
  * Returns a string representation of a SessionDescription object.
  */
@@ -141,9 +149,14 @@ export default class extends EventEmitter
    *  audioStream) for localVideo and to be added as stream to the
    *  {RTCPeerConnection}
    */
-  constructor(
-    mode,
-    {
+  constructor(mode, options, callback)
+  {
+    if (options instanceof Function) {
+      callback = options
+      options = undefined
+    }
+
+    const {
       audioStream,
       configuration,
       dataChannelConfig = {},
@@ -163,8 +176,8 @@ export default class extends EventEmitter
       simulcast,
       usePlanB,
       videoStream
-    } = {}
-  ) {
+    } = options || {}
+
     super()
 
     this.#audioStream = audioStream
@@ -205,6 +218,8 @@ export default class extends EventEmitter
     }
 
     this.#initPeerConnection()
+
+    asCallback(this.ready, callback)
   }
 
 
@@ -269,13 +284,13 @@ export default class extends EventEmitter
    *
    * @param candidate - Literal object with the ICE candidate description
    */
-  addIceCandidate(candidate) {
+  addIceCandidate(candidate, callback) {
     this.#logger.debug('Remote ICE candidate received', candidate)
 
     if (this.#multistream && this.#usePlanB)
       candidate = this.#interop.candidateToPlanB(candidate)
 
-    return this.#peerConnection.addIceCandidate(candidate)
+    return asCallback(this.#peerConnection.addIceCandidate(candidate), callback)
   }
 
   /**
@@ -299,7 +314,7 @@ export default class extends EventEmitter
     this.removeAllListeners();
   }
 
-  generateOffer() {
+  generateOffer(callback) {
     switch(this.#mode)
     {
       case 'recvonly':
@@ -343,7 +358,7 @@ export default class extends EventEmitter
           transceiver.direction = "sendonly";
     }
 
-    return this.#peerConnection.createOffer()
+    const promise = this.#peerConnection.createOffer()
     .then(this.#setLocalDescription)
     .then(() => {
       let {localDescription} = this.#peerConnection;
@@ -358,6 +373,8 @@ export default class extends EventEmitter
 
       return localDescription.sdp
     })
+
+    return asCallback(promise, callback)
   }
 
   getReceiver(index) {
@@ -376,7 +393,7 @@ export default class extends EventEmitter
    *
    * @param sdp - Description of sdpAnswer
    */
-  processAnswer(sdp) {
+  processAnswer(sdp, callback) {
     if (this.#peerConnection.connectionState === 'closed')
       return Promise.reject(new Error('PeerConnection is closed'))
 
@@ -391,8 +408,10 @@ export default class extends EventEmitter
       this.#logger.debug('asnwer::planB', dumpSDP(answer))
     }
 
-    return this.#peerConnection.setRemoteDescription(answer)
+    const promise = this.#peerConnection.setRemoteDescription(answer)
     .then(this.#setRemoteVideo)
+
+    return asCallback(promise, callback)
   }
 
   /**
@@ -403,7 +422,7 @@ export default class extends EventEmitter
    *
    * @param sdp - Description of sdpOffer
    */
-  processOffer(sdp) {
+  processOffer(sdp, callback) {
     if (this.#peerConnection.connectionState === 'closed')
       return Promise.reject(new Error('PeerConnection is closed'))
 
@@ -418,7 +437,7 @@ export default class extends EventEmitter
       this.#logger.debug('offer::planB', dumpSDP(offer))
     }
 
-    return this.#peerConnection.setRemoteDescription(offer)
+    const promise = this.#peerConnection.setRemoteDescription(offer)
     .then(this.#setRemoteVideo)
     .then(this.#peerConnection.createAnswer.bind(this.#peerConnection))
     .then(this.#setLocalDescription)
@@ -434,9 +453,11 @@ export default class extends EventEmitter
 
       return localDescription.sdp
     })
+
+    return asCallback(promise, callback)
   }
 
-  replaceStream(stream)
+  replaceStream(stream, callback)
   {
     // Replace local video
     if(this.#videoStream)
@@ -450,16 +471,18 @@ export default class extends EventEmitter
     // Replace senders
     const senders = this.peerConnection.getSenders()
 
-    return Promise.all(stream.getTracks().flatMap(replaceTracks, senders))
+    const promise = Promise.all(stream.getTracks().flatMap(replaceTracks, senders))
+
+    return asCallback(promise, callback)
   }
 
-  replaceTrack(track)
+  replaceTrack(track, callback)
   {
     const promise = typeof track === 'string'
                   ? this.#getMedia(track).then(getFirstVideoTrack)
                   : Promise.resolve(track)
 
-    return promise.then(this.#replaceTrack)
+    return asCallback(promise.then(this.#replaceTrack), callback)
   }
 
   send(data) {

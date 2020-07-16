@@ -67,9 +67,16 @@ export class WebRtcPeer extends WebRtcPeerCore
    *  audioStream) for localVideo and to be added as stream to the
    *  {RTCPeerConnection}
    */
-  constructor(mode, {localVideo, remoteVideo, ...options} = {})
+  constructor(mode, options, callback)
   {
-    super(mode, {usePlanB, ...options})
+    if (options instanceof Function) {
+      callback = options
+      options = undefined
+    }
+
+    const {localVideo, remoteVideo, ...coreOptions} = options || {}
+
+    super(mode, {usePlanB, ...coreOptions}, callback)
 
     this.#localVideo = localVideo
     this.#remoteVideo = remoteVideo
