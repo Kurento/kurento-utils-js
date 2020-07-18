@@ -347,6 +347,14 @@ export default class WebRtcPeerCore extends EventEmitter
       this.#logger.warn('Exception disposing webrtc peer:', err)
     }
 
+    if(this.#audioStream)
+      for(const track of this.#audioStream.getTracks())
+        track.stop()
+
+    if(this.#videoStream)
+      for(const track of this.#videoStream.getTracks())
+        track.stop()
+
     this.removeAllListeners();
   }
 
