@@ -27,11 +27,10 @@
  * @since 4.2.4
  */
 
-import {createCanvas} from 'canvas'
 import UAParser from 'ua-parser-js'
 import {MediaStream/* , mediaDevices*/} from 'wrtc'
 
-import WebRtcPeerCore from './WebRtcPeerCore'
+import {WebRtcPeerCore, createCanvas} from './WebRtcPeerCore'
 
 
 // Somehow, the UAParser constructor gets an empty window object.
@@ -82,7 +81,7 @@ export class WebRtcPeer extends WebRtcPeerCore
     this.#remoteVideo = remoteVideo
 
     this.on('setRemoteVideo', this.#setRemoteVideo)
-    this.on('showLocalVideo', this.#showLocalVideo)
+    this.on('setLocalVideo', this.#setLocalVideo)
   }
 
 
@@ -178,7 +177,7 @@ export class WebRtcPeer extends WebRtcPeerCore
   }
 
   // TODO eslint doesn't fully support private methods, replace arrow function
-  #showLocalVideo = () => {
+  #setLocalVideo = () => {
     if (!(this.videoStream && this.#localVideo)) return
 
     this.#localVideo.srcObject = this.videoStream

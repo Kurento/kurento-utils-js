@@ -31,11 +31,18 @@ import EventEmitter from 'events'
 
 import 'webrtc-adapter'
 
+import {createCanvas, createImageData} from 'canvas'
 import freeice from 'freeice'
 import merge from 'merge'
 import sdpTranslator from 'sdp-translator'
 import {v4} from 'uuid'
-import {RTCPeerConnection, RTCSessionDescription/*, mediaDevices*/} from 'wrtc'
+import {
+  RTCPeerConnection,
+  RTCSessionDescription,
+  nonstandard
+} from 'wrtc'
+
+const {RTCVideoSink, i420ToRgba} = nonstandard
 
 
 const recursive = merge.recursive.bind(undefined, true)
@@ -133,7 +140,7 @@ function setMediaEnabled(type, value) {
  * Wrapper object of an {RTCPeerConnection}. This object is aimed to simplify
  * the development of WebRTC-based applications.
  */
-export default class extends EventEmitter
+export default class WebRtcPeerCore extends EventEmitter
 {
   /**
    * @constructor module:kurentoUtils.WebRtcPeer
@@ -194,7 +201,13 @@ export default class extends EventEmitter
     this.#sendSource = sendSource
     this.#simulcast = simulcast
     this.#usePlanB = usePlanB
-    this.#videoStream = videoStream
+
+    if(videoStream)
+    {
+      this.#videoStream = videoStream
+
+      this.#setVideoSink(videoStream)
+    }
 
     this.#interop = new sdpTranslator.Interop()
 
@@ -232,6 +245,28 @@ export default class extends EventEmitter
   }
   set audioEnabled(value) {
     setMediaEnabled.call(this, 'Audio', value)
+  }
+
+  /**
+   * @member {(external:ImageData|undefined)} currentFrame
+   */
+  get currentFrame() {
+    const lastFrame = this.#lastFrame
+
+    if(!lastFrame) throw new Error('No remote video stream available')
+
+    const {height, width} = lastFrame
+
+    const rgba = new Uint8ClampedArray(width * height * 4)
+    const rgbaFrame = createImageData(rgba, width, height)
+
+    i420ToRgba(lastFrame, rgbaFrame)
+
+    const canvas = createCanvas(width, height)
+
+    canvas.getContext('2d').putImageData(rgbaFrame, 0, 0)
+
+    return canvas
   }
 
   get dataChannel() {
@@ -464,9 +499,7 @@ export default class extends EventEmitter
       for(const track of this.#videoStream.getTracks())
         track.stop();
 
-    this.#videoStream = stream
-
-    this.emit('showLocalVideo')
+    this.#setVideoStream(stream)
 
     // Replace senders
     const senders = this.peerConnection.getSenders()
@@ -506,6 +539,7 @@ export default class extends EventEmitter
   #id  // read only
   #interop
   #dataChannel
+  #lastFrame
   #logger
   #mediaConstraints
   #mode
@@ -519,6 +553,7 @@ export default class extends EventEmitter
   #simulcast
   #usePlanB
   #videoStream
+  #videoSink
 
   // TODO eslint doesn't fully support private methods, replace arrow function
   #getMedia = track =>
@@ -546,9 +581,7 @@ export default class extends EventEmitter
             stream.addTrack(track);
       }
 
-      this.#videoStream = stream
-
-      this.emit('showLocalVideo')
+      this.#setVideoStream(stream)
 
       return stream
     })
@@ -618,7 +651,7 @@ export default class extends EventEmitter
     let promise
     if(this.#mode === 'recvonly' || this.#videoStream || this.#audioStream)
     {
-      this.emit('showLocalVideo')
+      this.emit('setLocalVideo')
 
       promise = Promise.resolve()
     }
@@ -644,6 +677,8 @@ export default class extends EventEmitter
       break;
     }
   }
+
+  #onFrame = ({frame}) => this.#lastFrame = frame
 
   // If event.candidate == null, it means that candidate gathering has finished
   // and RTCPeerConnection.iceGatheringState === "complete". Such candidate does
@@ -715,6 +750,32 @@ export default class extends EventEmitter
     return this.#peerConnection.setLocalDescription(localDescription)
   }
 
+  // TODO eslint doesn't fully support private methods, replace arrow function
+  #setVideoSink = stream =>
+  {
+    this.#videoSink = new RTCVideoSink(stream.getVideoTracks()[0])
+    this.#videoSink.addEventListener('frame', this.#onFrame)
+  }
+
+  // TODO eslint doesn't fully support private methods, replace arrow function
+  #setVideoStream = stream =>
+  {
+    if(this.#videoSink)
+    {
+      this.#videoSink.stop()
+      this.#videoSink.removeEventListener('frame', this.#onFrame)
+    }
+
+    this.#videoStream = stream
+
+    this.emit('setLocalVideo')
+
+    if(stream) return this.#setVideoSink(stream)
+
+    this.#lastFrame = null
+    this.#videoSink = null
+  }
+
   #setRemoteVideo = () =>
   {
     this.emit('setRemoteVideo')
@@ -748,3 +809,7 @@ export default class extends EventEmitter
     }
   }
 }
+
+
+// https://github.com/Automattic/node-canvas/issues/487
+export {WebRtcPeerCore, createCanvas}
