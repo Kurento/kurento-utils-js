@@ -110,9 +110,7 @@ export class WebRtcPeer extends WebRtcPeerCore
     else if (video.readyState < video.HAVE_CURRENT_DATA)
       throw new Error('No remote video stream data available')
 
-    const canvas = createCanvas()
-    canvas.width = video.videoWidth
-    canvas.height = video.videoHeight
+    const canvas = createCanvas(video.videoWidth, video.videoHeight)
 
     canvas.getContext('2d').drawImage(video, 0, 0)
 
