@@ -42,8 +42,6 @@ import {
   nonstandard
 } from 'wrtc'
 
-const {RTCVideoSink, i420ToRgba} = nonstandard
-
 
 const recursive = merge.recursive.bind(undefined, true)
 
@@ -206,7 +204,7 @@ export default class WebRtcPeerCore extends EventEmitter
     {
       this.#videoStream = videoStream
 
-      this.#setVideoSink(videoStream)
+      if(nonstandard) this.#setVideoSink(videoStream)
     }
 
     this.#interop = new sdpTranslator.Interop()
@@ -251,6 +249,9 @@ export default class WebRtcPeerCore extends EventEmitter
    * @member {(external:ImageData|undefined)} currentFrame
    */
   get currentFrame() {
+    if(!nonstandard)
+      throw new Error('Stream-based `currentFrame` only available in Node.js')
+
     const lastFrame = this.#lastFrame
 
     if(!lastFrame) throw new Error('No remote video stream available')
@@ -260,7 +261,7 @@ export default class WebRtcPeerCore extends EventEmitter
     const rgba = new Uint8ClampedArray(width * height * 4)
     const rgbaFrame = createImageData(rgba, width, height)
 
-    i420ToRgba(lastFrame, rgbaFrame)
+    nonstandard.i420ToRgba(lastFrame, rgbaFrame)
 
     const canvas = createCanvas(width, height)
 
@@ -753,7 +754,9 @@ export default class WebRtcPeerCore extends EventEmitter
   // TODO eslint doesn't fully support private methods, replace arrow function
   #setVideoSink = stream =>
   {
-    this.#videoSink = new RTCVideoSink(stream.getVideoTracks()[0])
+    if(!nonstandard) return
+
+    this.#videoSink = new nonstandard.RTCVideoSink(stream.getVideoTracks()[0])
     this.#videoSink.addEventListener('frame', this.#onFrame)
   }
 
