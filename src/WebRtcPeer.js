@@ -178,7 +178,7 @@ export class WebRtcPeer extends WebRtcPeerCore
 
   // TODO eslint doesn't fully support private methods, replace arrow function
   #setLocalVideo = () => {
-    if (!(this.videoStream && this.#localVideo)) return
+    if (!this.#localVideo) return
 
     this.#localVideo.srcObject = this.videoStream
     this.#localVideo.muted = true
