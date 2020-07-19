@@ -39,6 +39,7 @@ import {v4} from 'uuid'
 import {
   RTCPeerConnection,
   RTCSessionDescription,
+  mediaDevices,
   nonstandard
 } from 'wrtc'
 
@@ -575,8 +576,7 @@ export default class WebRtcPeerCore extends EventEmitter
       constraints = {audio: false, video: true}
     }
 
-    return navigator.mediaDevices[method](constraints)
-    // return mediaDevices[method](constraints)
+    return mediaDevices[method](constraints)
     .then(stream => {
       if(this.#videoStream)
       {

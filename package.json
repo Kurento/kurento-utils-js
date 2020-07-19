@@ -71,7 +71,7 @@
     "ua-parser-js": "^0.7.21",
     "uuid": "^8.2.0",
     "webrtc-adapter": "^7.6.3",
-    "wrtc": "^0.4.5"
+    "wrtc": "^0.4.6"
   },
   "devDependencies": {
     "@babel/cli": "^7.10.5",
