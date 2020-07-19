@@ -40,18 +40,36 @@ export {WebRtcPeer, WebRtcPeerCore}
 
 export function WebRtcPeerRecvonly(options, callback)
 {
-  return new WebRtcPeer('recvonly', options, callback)
+  const result = new WebRtcPeer('recvonly', options, callback)
+
+  result.constructor = WebRtcPeerRecvonly
+  result.__proto__ = WebRtcPeerRecvonly.prototype
+
+  return result
 }
+WebRtcPeerRecvonly.prototype = WebRtcPeer.prototype
 
 export function WebRtcPeerSendonly(options, callback)
 {
-  return new WebRtcPeer('sendonly', options, callback)
+  const result = new WebRtcPeer('sendonly', options, callback)
+
+  result.constructor = WebRtcPeerSendonly
+  result.__proto__ = WebRtcPeerSendonly.prototype
+
+  return result
 }
+WebRtcPeerSendonly.prototype = WebRtcPeer.prototype
 
 export function WebRtcPeerSendrecv(options, callback)
 {
-  return new WebRtcPeer('sendrecv', options, callback)
+  const result = new WebRtcPeer('sendrecv', options, callback)
+
+  result.constructor = WebRtcPeerSendrecv
+  result.__proto__ = WebRtcPeerSendrecv.prototype
+
+  return result
 }
+WebRtcPeerSendrecv.prototype = WebRtcPeer.prototype
 
 
 export default {

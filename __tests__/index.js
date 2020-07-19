@@ -46,7 +46,8 @@ import {
 } from "wrtc";
 
 import {
-    createCanvas, WebRtcPeerRecvonly, WebRtcPeerSendonly, WebRtcPeerSendrecv
+  createCanvas, WebRtcPeer, WebRtcPeerCore, WebRtcPeerRecvonly,
+  WebRtcPeerSendonly, WebRtcPeerSendrecv
 } from "../src";
 
 import RTCAudioSourceSineWave from "../testutils/rtcaudiosourcesinewave";
@@ -90,168 +91,237 @@ afterEach(function () {
 });
 
 describe("Child classes", function () {
-  test("WebRtcPeerRecvonly", function () {
-    expect.assertions(1);
+  describe("WebRtcPeerRecvonly", function () {
+    describe('inheritance', function()
+    {
+      test('`new`', function()
+      {
+        webRtcPeer = new WebRtcPeerRecvonly()
 
-    const options = {
-      configuration: {
-        iceServers: [],
-      },
-      logger
-    };
+        expect(webRtcPeer).toBeInstanceOf(WebRtcPeerCore)
+        expect(webRtcPeer).toBeInstanceOf(WebRtcPeer)
+        expect(webRtcPeer).toBeInstanceOf(WebRtcPeerRecvonly)
+      })
 
-    webRtcPeer = new WebRtcPeerRecvonly(options);
-    peerConnection = new RTCPeerConnection();
-    setIceCandidateCallbacks(webRtcPeer, peerConnection);
+      test('not `new`', function()
+      {
+        webRtcPeer = WebRtcPeerRecvonly()
 
-    return webRtcPeer.ready
-    .then(function () {
-      return webRtcPeer.generateOffer();
+        expect(webRtcPeer).toBeInstanceOf(WebRtcPeerCore)
+        expect(webRtcPeer).toBeInstanceOf(WebRtcPeer)
+        expect(webRtcPeer).toBeInstanceOf(WebRtcPeerRecvonly)
+      })
     })
-    .then(function (sdpOffer) {
-      const offer = new RTCSessionDescription({
-        type: "offer",
-        sdp: sdpOffer,
+
+    test("behaviour", function () {
+      expect.assertions(1);
+
+      const options = {
+        configuration: {
+          iceServers: [],
+        },
+        logger
+      };
+
+      webRtcPeer = new WebRtcPeerRecvonly(options);
+      peerConnection = new RTCPeerConnection();
+      setIceCandidateCallbacks(webRtcPeer, peerConnection);
+
+      return webRtcPeer.ready
+      .then(function () {
+        return webRtcPeer.generateOffer();
+      })
+      .then(function (sdpOffer) {
+        const offer = new RTCSessionDescription({
+          type: "offer",
+          sdp: sdpOffer,
+        });
+
+        return peerConnection.setRemoteDescription(offer);
+      })
+      .then(function () {
+        track = new RTCAudioSourceSineWave().createTrack();
+
+        peerConnection.addTrack(track);
+
+        return peerConnection.createAnswer();
+      })
+      .then(function (answer) {
+        return peerConnection.setLocalDescription(answer);
+      })
+      .then(function () {
+        return webRtcPeer.processAnswer(peerConnection.localDescription.sdp);
+      })
+      .then(function () {
+        const receiver = webRtcPeer.getReceiver();
+
+        expect(receiver).toMatchInlineSnapshot(`RTCRtpReceiver {}`);
       });
+    });
+  });
 
-      return peerConnection.setRemoteDescription(offer);
+  describe("WebRtcPeerSendonly", function () {
+    describe('inheritance', function()
+    {
+      test('`new`', function()
+      {
+        webRtcPeer = new WebRtcPeerSendonly()
+
+        expect(webRtcPeer).toBeInstanceOf(WebRtcPeerCore)
+        expect(webRtcPeer).toBeInstanceOf(WebRtcPeer)
+        expect(webRtcPeer).toBeInstanceOf(WebRtcPeerSendonly)
+      })
+
+      test('not `new`', function()
+      {
+        webRtcPeer = WebRtcPeerSendonly()
+
+        expect(webRtcPeer).toBeInstanceOf(WebRtcPeerCore)
+        expect(webRtcPeer).toBeInstanceOf(WebRtcPeer)
+        expect(webRtcPeer).toBeInstanceOf(WebRtcPeerSendonly)
+      })
     })
-    .then(function () {
+
+    test("behaviour", function () {
+      expect.assertions(2);
+
       track = new RTCAudioSourceSineWave().createTrack();
 
-      peerConnection.addTrack(track);
+      const audioStream = new MediaStream();
+      audioStream.addTrack(track);
 
-      return peerConnection.createAnswer();
-    })
-    .then(function (answer) {
-      return peerConnection.setLocalDescription(answer);
-    })
-    .then(function () {
-      return webRtcPeer.processAnswer(peerConnection.localDescription.sdp);
-    })
-    .then(function () {
-      const receiver = webRtcPeer.getReceiver();
+      const options = {
+        audioStream,
+        configuration: {
+          iceServers: [],
+        },
+        logger
+      };
 
-      expect(receiver).toMatchInlineSnapshot(`RTCRtpReceiver {}`);
+      webRtcPeer = new WebRtcPeerSendonly(options);
+      peerConnection = new RTCPeerConnection();
+      setIceCandidateCallbacks(webRtcPeer, peerConnection);
+
+      return webRtcPeer.ready
+      .then(function () {
+        return webRtcPeer.generateOffer();
+      })
+      .then(function (sdpOffer) {
+        const sender = webRtcPeer.getSender();
+
+        expect(sender.track).toBe(track);
+
+        const offer = new RTCSessionDescription({
+          type: "offer",
+          sdp: sdpOffer,
+        });
+
+        return peerConnection.setRemoteDescription(offer);
+      })
+      .then(function () {
+        const receivers = peerConnection.getReceivers();
+
+        expect(receivers).toMatchInlineSnapshot(`
+          Array [
+            RTCRtpReceiver {},
+          ]
+        `);
+
+        return peerConnection.createAnswer();
+      })
+      .then(function (answer) {
+        return peerConnection.setLocalDescription(answer);
+      })
+      .then(function () {
+        return webRtcPeer.processAnswer(peerConnection.localDescription.sdp);
+      });
     });
   });
 
-  test("WebRtcPeerSendonly", function () {
-    expect.assertions(2);
+  describe("WebRtcPeerSendrecv", function () {
+    describe('inheritance', function()
+    {
+      test('`new`', function()
+      {
+        webRtcPeer = new WebRtcPeerSendrecv()
 
-    track = new RTCAudioSourceSineWave().createTrack();
+        expect(webRtcPeer).toBeInstanceOf(WebRtcPeerCore)
+        expect(webRtcPeer).toBeInstanceOf(WebRtcPeer)
+        expect(webRtcPeer).toBeInstanceOf(WebRtcPeerSendrecv)
+      })
 
-    const audioStream = new MediaStream();
-    audioStream.addTrack(track);
+      test('not `new`', function()
+      {
+        webRtcPeer = WebRtcPeerSendrecv()
 
-    const options = {
-      audioStream,
-      configuration: {
-        iceServers: [],
-      },
-      logger
-    };
-
-    webRtcPeer = new WebRtcPeerSendonly(options);
-    peerConnection = new RTCPeerConnection();
-    setIceCandidateCallbacks(webRtcPeer, peerConnection);
-
-    return webRtcPeer.ready
-    .then(function () {
-      return webRtcPeer.generateOffer();
+        expect(webRtcPeer).toBeInstanceOf(WebRtcPeerCore)
+        expect(webRtcPeer).toBeInstanceOf(WebRtcPeer)
+        expect(webRtcPeer).toBeInstanceOf(WebRtcPeerSendrecv)
+      })
     })
-    .then(function (sdpOffer) {
-      const sender = webRtcPeer.getSender();
 
-      expect(sender.track).toBe(track);
+    test("behaviour", function () {
+      expect.assertions(3);
 
-      const offer = new RTCSessionDescription({
-        type: "offer",
-        sdp: sdpOffer,
+      track = new RTCAudioSourceSineWave().createTrack();
+
+      const audioStream = new MediaStream();
+      audioStream.addTrack(track);
+
+      const options = {
+        audioStream,
+        configuration: {
+          iceServers: [],
+        },
+        logger
+      };
+
+      webRtcPeer = new WebRtcPeerSendrecv(options);
+      peerConnection = new RTCPeerConnection();
+      setIceCandidateCallbacks(webRtcPeer, peerConnection);
+
+      return webRtcPeer.ready
+      .then(function () {
+        return webRtcPeer.generateOffer();
+      })
+      .then(function (sdpOffer) {
+        const sender = webRtcPeer.getSender();
+
+        expect(sender.track).toBe(track);
+
+        const offer = new RTCSessionDescription({
+          type: "offer",
+          sdp: sdpOffer,
+        });
+
+        return peerConnection.setRemoteDescription(offer);
+      })
+      .then(function () {
+        const receivers = peerConnection.getReceivers();
+
+        expect(receivers).toMatchInlineSnapshot(`
+          Array [
+            RTCRtpReceiver {},
+          ]
+        `);
+
+        track2 = new RTCAudioSourceSineWave().createTrack();
+
+        peerConnection.addTrack(track2);
+
+        return peerConnection.createAnswer();
+      })
+      .then(function (answer) {
+        return peerConnection.setLocalDescription(answer);
+      })
+      .then(function () {
+        return webRtcPeer.processAnswer(peerConnection.localDescription.sdp);
+      })
+      .then(function () {
+        const receiver = webRtcPeer.getReceiver();
+
+        expect(receiver).toMatchInlineSnapshot(`RTCRtpReceiver {}`);
       });
-
-      return peerConnection.setRemoteDescription(offer);
-    })
-    .then(function () {
-      const receivers = peerConnection.getReceivers();
-
-      expect(receivers).toMatchInlineSnapshot(`
-        Array [
-          RTCRtpReceiver {},
-        ]
-      `);
-
-      return peerConnection.createAnswer();
-    })
-    .then(function (answer) {
-      return peerConnection.setLocalDescription(answer);
-    })
-    .then(function () {
-      return webRtcPeer.processAnswer(peerConnection.localDescription.sdp);
-    });
-  });
-
-  test("WebRtcPeerSendrecv", function () {
-    expect.assertions(3);
-
-    track = new RTCAudioSourceSineWave().createTrack();
-
-    const audioStream = new MediaStream();
-    audioStream.addTrack(track);
-
-    const options = {
-      audioStream,
-      configuration: {
-        iceServers: [],
-      },
-      logger
-    };
-
-    webRtcPeer = new WebRtcPeerSendrecv(options);
-    peerConnection = new RTCPeerConnection();
-    setIceCandidateCallbacks(webRtcPeer, peerConnection);
-
-    return webRtcPeer.ready
-    .then(function () {
-      return webRtcPeer.generateOffer();
-    })
-    .then(function (sdpOffer) {
-      const sender = webRtcPeer.getSender();
-
-      expect(sender.track).toBe(track);
-
-      const offer = new RTCSessionDescription({
-        type: "offer",
-        sdp: sdpOffer,
-      });
-
-      return peerConnection.setRemoteDescription(offer);
-    })
-    .then(function () {
-      const receivers = peerConnection.getReceivers();
-
-      expect(receivers).toMatchInlineSnapshot(`
-        Array [
-          RTCRtpReceiver {},
-        ]
-      `);
-
-      track2 = new RTCAudioSourceSineWave().createTrack();
-
-      peerConnection.addTrack(track2);
-
-      return peerConnection.createAnswer();
-    })
-    .then(function (answer) {
-      return peerConnection.setLocalDescription(answer);
-    })
-    .then(function () {
-      return webRtcPeer.processAnswer(peerConnection.localDescription.sdp);
-    })
-    .then(function () {
-      const receiver = webRtcPeer.getReceiver();
-
-      expect(receiver).toMatchInlineSnapshot(`RTCRtpReceiver {}`);
     });
   });
 });
