@@ -153,6 +153,59 @@ export class WebRtcPeer extends WebRtcPeerCore
     super.dispose()
   }
 
+  /**
+   * Get local session descriptor
+   *
+   * @deprecated use `WebRtcPeerCore.peerConnection.localDescription` instead
+   */
+  getLocalSessionDescriptor() {
+    return this.peerConnection.localDescription
+  }
+
+  /**
+   * Get local stream
+   *
+   * @deprecated use directly `WebRtcPeerCore.getSender()`
+   */
+  getLocalStream(index) {
+    const stream = new MediaStream()
+
+    for(const {track} of this.getSender(index))
+      stream.addTrack(track);
+
+    return stream
+  }
+
+  /**
+   * Get remote session descriptor
+   *
+   * @deprecated use `WebRtcPeerCore.peerConnection.remoteDescription` instead
+   */
+  getRemoteSessionDescriptor() {
+    return this.peerConnection.remoteDescription
+  }
+
+  /**
+   * Get remote stream
+   *
+   * @deprecated use directly `WebRtcPeerCore.getReceiver()`
+   */
+  getRemoteStream(index) {
+    const stream = new MediaStream()
+
+    for(const {track} of this.getSender(index))
+      stream.addTrack(track);
+
+    return stream
+  }
+
+  /**
+   * Set the local video to the current local video stream
+   *
+   * @deprecated Local video is automatically set, this is a no-op, don't use it
+   */
+  showLocalVideo() {}
+
 
   //
   // Private API
