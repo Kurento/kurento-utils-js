@@ -501,7 +501,7 @@ export default class WebRtcPeerCore extends EventEmitter
     return asCallback(promise, callback)
   }
 
-  replaceStream(stream, callback)
+  replaceStream(stream)
   {
     // Replace local video
     if(this.#videoStream)
@@ -513,18 +513,16 @@ export default class WebRtcPeerCore extends EventEmitter
     // Replace senders
     const senders = this.peerConnection.getSenders()
 
-    const promise = Promise.all(stream.getTracks().flatMap(replaceTracks, senders))
-
-    return asCallback(promise, callback)
+    return Promise.all(stream.getTracks().flatMap(replaceTracks, senders))
   }
 
-  replaceTrack(track, callback)
+  replaceTrack(track)
   {
     const promise = typeof track === 'string'
                   ? this.#getMedia(track).then(getFirstVideoTrack)
                   : Promise.resolve(track)
 
-    return asCallback(promise.then(this.#replaceTrack), callback)
+    return promise.then(this.#replaceTrack)
   }
 
   send(data) {
