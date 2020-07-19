@@ -56,6 +56,12 @@ const MEDIA_CONSTRAINTS = {
 }
 
 
+/**
+ * Apply an optional callback to a promise and return the new one
+ *
+ * @param Promise promise
+ * @param {} [callback]
+ */
 function asCallback(promise, callback)
 {
   if(callback) return promise.then(callback.bind(null, null), callback)
@@ -154,6 +160,7 @@ export default class WebRtcPeerCore extends EventEmitter
    *  source (typically video and audio, or only video if combined with
    *  audioStream) for localVideo and to be added as stream to the
    *  {RTCPeerConnection}
+   * @param {} [callback] Deprecated
    */
   constructor(mode, options, callback)
   {
@@ -320,6 +327,9 @@ export default class WebRtcPeerCore extends EventEmitter
    * @function module:kurentoUtils.WebRtcPeer.prototype.addIceCandidate
    *
    * @param candidate - Literal object with the ICE candidate description
+   * @param [callback] - Deprecated: Called when the ICE candidate has been added
+   *
+   * @returns Promise
    */
   addIceCandidate(candidate, callback) {
     this.#logger.debug('Remote ICE candidate received', candidate)
@@ -359,6 +369,11 @@ export default class WebRtcPeerCore extends EventEmitter
     this.removeAllListeners();
   }
 
+  /**
+   * @param [callback] - Deprecated
+   *
+   * @returns {Promise}
+   */
   generateOffer(callback) {
     switch(this.#mode)
     {
@@ -422,21 +437,35 @@ export default class WebRtcPeerCore extends EventEmitter
     return asCallback(promise, callback)
   }
 
+  /**
+   *
+   * @param {Integer} [index]
+   */
   getReceiver(index) {
     return this.#peerConnection.getReceivers()[index || 0]
   }
 
+  /**
+   *
+   * @param {Integer} [index]
+   */
   getSender(index) {
     return this.#peerConnection.getSenders()[index || 0]
   }
 
   /**
-   * Callback function invoked when a SDP answer is received. Developers are
-   * expected to invoke this function in order to complete the SDP negotiation.
+   * Callback function invoked when a SDP answer is received
+   *
+   * Developers are expected to invoke this function in order to complete the
+   * SDP negotiation.
    *
    * @function module:kurentoUtils.WebRtcPeer.prototype.processAnswer
    *
    * @param sdp - Description of sdpAnswer
+   * @param {} [callback] - Deprecated: Invoked after the SDP answer is
+   *  processed, or there is an error
+   *
+   * @returns {Promise}
    */
   processAnswer(sdp, callback) {
     if (this.#peerConnection.connectionState === 'closed')
@@ -460,12 +489,18 @@ export default class WebRtcPeerCore extends EventEmitter
   }
 
   /**
-   * Callback function invoked when a SDP offer is received. Developers are
-   * expected to invoke this function in order to complete the SDP negotiation.
+   * Callback function invoked when a SDP offer is received
+   *
+   * Developers are expected to invoke this function in order to complete the
+   * SDP negotiation.
    *
    * @function module:kurentoUtils.WebRtcPeer.prototype.processOffer
    *
    * @param sdp - Description of sdpOffer
+   * @param {} [callback] - Deprecated: Called when the remote description has
+   *  been set successfully
+   *
+   * @returns {Promise}
    */
   processOffer(sdp, callback) {
     if (this.#peerConnection.connectionState === 'closed')
@@ -502,6 +537,13 @@ export default class WebRtcPeerCore extends EventEmitter
     return asCallback(promise, callback)
   }
 
+  /**
+   * Fully replace the sending stream without re-negotiation
+   *
+   * @param {MediaStream} stream
+   *
+   * @returns {Promise}
+   */
   replaceStream(stream)
   {
     // Replace local video
@@ -517,6 +559,13 @@ export default class WebRtcPeerCore extends EventEmitter
     return Promise.all(stream.getTracks().flatMap(replaceTracks, senders))
   }
 
+  /**
+   * Replace the video track in the sending stream without re-negotiation
+   *
+   * @param {MediaTrack|String} track
+   *
+   * @returns {Promise}
+   */
   replaceTrack(track)
   {
     const promise = typeof track === 'string'
@@ -526,6 +575,11 @@ export default class WebRtcPeerCore extends EventEmitter
     return promise.then(this.#replaceTrack)
   }
 
+  /**
+   * Send a message using the DataChannel instance
+   *
+   * @param {*} data
+   */
   send(data) {
     if (this.#dataChannel?.readyState === 'open')
       return this.#dataChannel.send(data)
