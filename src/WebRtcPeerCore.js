@@ -441,16 +441,16 @@ export default class WebRtcPeerCore extends EventEmitter
    *
    * @param {Integer} [index]
    */
-  getReceiver(index) {
-    return this.#peerConnection.getReceivers()[index || 0]
+  getReceiver(index = 0) {
+    return this.#peerConnection.getReceivers()[index]
   }
 
   /**
    *
    * @param {Integer} [index]
    */
-  getSender(index) {
-    return this.#peerConnection.getSenders()[index || 0]
+  getSender(index = 0) {
+    return this.#peerConnection.getSenders()[index]
   }
 
   /**
