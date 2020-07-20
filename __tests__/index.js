@@ -96,7 +96,7 @@ describe("Child classes", function () {
     {
       test('`new`', function()
       {
-        webRtcPeer = new WebRtcPeerRecvonly()
+        webRtcPeer = new WebRtcPeerRecvonly({logger})
 
         expect(webRtcPeer).toBeInstanceOf(WebRtcPeerCore)
         expect(webRtcPeer).toBeInstanceOf(WebRtcPeer)
@@ -105,7 +105,7 @@ describe("Child classes", function () {
 
       test('not `new`', function()
       {
-        webRtcPeer = WebRtcPeerRecvonly()
+        webRtcPeer = WebRtcPeerRecvonly({logger})
 
         expect(webRtcPeer).toBeInstanceOf(WebRtcPeerCore)
         expect(webRtcPeer).toBeInstanceOf(WebRtcPeer)
@@ -165,7 +165,7 @@ describe("Child classes", function () {
     {
       test('`new`', function()
       {
-        webRtcPeer = new WebRtcPeerSendonly()
+        webRtcPeer = new WebRtcPeerSendonly({logger})
 
         expect(webRtcPeer).toBeInstanceOf(WebRtcPeerCore)
         expect(webRtcPeer).toBeInstanceOf(WebRtcPeer)
@@ -174,7 +174,7 @@ describe("Child classes", function () {
 
       test('not `new`', function()
       {
-        webRtcPeer = WebRtcPeerSendonly()
+        webRtcPeer = WebRtcPeerSendonly({logger})
 
         expect(webRtcPeer).toBeInstanceOf(WebRtcPeerCore)
         expect(webRtcPeer).toBeInstanceOf(WebRtcPeer)
@@ -243,7 +243,7 @@ describe("Child classes", function () {
     {
       test('`new`', function()
       {
-        webRtcPeer = new WebRtcPeerSendrecv()
+        webRtcPeer = new WebRtcPeerSendrecv({logger})
 
         expect(webRtcPeer).toBeInstanceOf(WebRtcPeerCore)
         expect(webRtcPeer).toBeInstanceOf(WebRtcPeer)
@@ -252,7 +252,7 @@ describe("Child classes", function () {
 
       test('not `new`', function()
       {
-        webRtcPeer = WebRtcPeerSendrecv()
+        webRtcPeer = WebRtcPeerSendrecv({logger})
 
         expect(webRtcPeer).toBeInstanceOf(WebRtcPeerCore)
         expect(webRtcPeer).toBeInstanceOf(WebRtcPeer)
