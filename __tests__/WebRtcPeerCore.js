@@ -67,21 +67,19 @@ test("processOffer with closed PeerConnection", function () {
   );
 });
 
-test('replaceStream', function()
-{
+test("replaceStream", function () {
   webRtcPeer = new WebRtcPeerCore("sendonly", { logger });
 
   const stream = {
-    getTracks()
-    {
-      return []
+    getTracks() {
+      return [];
     },
 
-    getVideoTracks()
-    {
-      return []
-    }
-  }
+    getVideoTracks() {
+      return [];
+    },
+  };
+
   return webRtcPeer.replaceStream(stream);
 });
 
