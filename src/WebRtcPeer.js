@@ -153,11 +153,17 @@ export class WebRtcPeer extends WebRtcPeerCore
     super.dispose()
   }
 
+
+  //
+  // Deprecated public APIs
+  //
+
   /**
    * Get local session descriptor
    *
    * @deprecated use `WebRtcPeerCore.peerConnection.localDescription` instead
    */
+  /* istanbul ignore next */
   getLocalSessionDescriptor() {
     return this.peerConnection.localDescription
   }
@@ -167,6 +173,7 @@ export class WebRtcPeer extends WebRtcPeerCore
    *
    * @deprecated use directly `WebRtcPeerCore.getSender()`
    */
+  /* istanbul ignore next */
   getLocalStream(index) {
     const stream = new MediaStream()
 
@@ -181,6 +188,7 @@ export class WebRtcPeer extends WebRtcPeerCore
    *
    * @deprecated use `WebRtcPeerCore.peerConnection.remoteDescription` instead
    */
+  /* istanbul ignore next */
   getRemoteSessionDescriptor() {
     return this.peerConnection.remoteDescription
   }
@@ -190,6 +198,7 @@ export class WebRtcPeer extends WebRtcPeerCore
    *
    * @deprecated use directly `WebRtcPeerCore.getReceiver()`
    */
+  /* istanbul ignore next */
   getRemoteStream(index) {
     const stream = new MediaStream()
 
@@ -204,6 +213,7 @@ export class WebRtcPeer extends WebRtcPeerCore
    *
    * @deprecated Local video is automatically set, this is a no-op, don't use it
    */
+  /* istanbul ignore next */
   showLocalVideo() {}
 
 
