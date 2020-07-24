@@ -34,7 +34,6 @@ import 'webrtc-adapter'
 import {createCanvas, createImageData} from 'canvas'
 import freeice from 'freeice'
 import merge from 'merge'
-import sdpTranslator from 'sdp-translator'
 import {v4} from 'uuid'
 import {
   RTCPeerConnection,
@@ -69,15 +68,6 @@ function asCallback(promise, callback)
   return promise
 }
 
-
-/**
- * Returns a string representation of a SessionDescription object.
- */
-function dumpSDP(description) {
-  if (description == null) return ''
-
-  return `type: ${description.type}\r\n${description.sdp}`
-}
 
 function filterTracksType({track: {kind}})
 {
@@ -178,7 +168,6 @@ export default class WebRtcPeerCore extends EventEmitter
       id = v4(),
       logger = console,
       mediaConstraints = MEDIA_CONSTRAINTS,
-      multistream,
       oncandidategatheringdone,
       onicecandidate,
       onnegotiationneeded,
@@ -200,7 +189,6 @@ export default class WebRtcPeerCore extends EventEmitter
     this.#logger = logger
     this.#mediaConstraints = mediaConstraints
     this.#mode = mode
-    this.#multistream = multistream
     this.#onnegotiationneeded = onnegotiationneeded
     this.#ontrack = ontrack
     this.#peerConnection = peerConnection
@@ -214,8 +202,6 @@ export default class WebRtcPeerCore extends EventEmitter
 
       if(nonstandard) this.#setVideoSink(videoStream)
     }
-
-    this.#interop = new sdpTranslator.Interop()
 
     this.#peerconnectionConfiguration = recursive({
       iceServers: freeice(freeiceOpts)
@@ -334,9 +320,6 @@ export default class WebRtcPeerCore extends EventEmitter
   addIceCandidate(candidate, callback) {
     this.#logger.debug('Remote ICE candidate received', candidate)
 
-    if (this.#multistream && this.#usePlanB)
-      candidate = this.#interop.candidateToPlanB(candidate)
-
     return asCallback(this.#peerConnection.addIceCandidate(candidate), callback)
   }
 
@@ -421,15 +404,8 @@ export default class WebRtcPeerCore extends EventEmitter
     const promise = this.#peerConnection.createOffer()
     .then(this.#setLocalDescription)
     .then(() => {
-      let {localDescription} = this.#peerConnection;
+      const {localDescription} = this.#peerConnection;
       this.#logger.debug('Local description set\n', localDescription.sdp);
-
-      if (this.#multistream && this.#usePlanB) {
-        localDescription = this.#interop.toUnifiedPlan(localDescription);
-
-        this.#logger.debug('offer::origPlanB->UnifiedPlan', dumpSDP(
-          localDescription));
-      }
 
       return localDescription.sdp
     })
@@ -471,16 +447,10 @@ export default class WebRtcPeerCore extends EventEmitter
     if (this.#peerConnection.connectionState === 'closed')
       return Promise.reject(new Error('PeerConnection is closed'))
 
-    let answer = new RTCSessionDescription({
+    const answer = new RTCSessionDescription({
       type: 'answer',
       sdp
     })
-
-    if (this.#multistream && this.#usePlanB) {
-      answer = this.#interop.toPlanB(answer)
-
-      this.#logger.debug('asnwer::planB', dumpSDP(answer))
-    }
 
     const promise = this.#peerConnection.setRemoteDescription(answer)
     .then(this.#setRemoteVideo)
@@ -506,33 +476,16 @@ export default class WebRtcPeerCore extends EventEmitter
     if (this.#peerConnection.connectionState === 'closed')
       return Promise.reject(new Error('PeerConnection is closed'))
 
-    let offer = new RTCSessionDescription({
+    const offer = new RTCSessionDescription({
       type: 'offer',
       sdp
     })
-
-    if (this.#multistream && this.#usePlanB) {
-      offer = this.#interop.toPlanB(offer)
-
-      this.#logger.debug('offer::planB', dumpSDP(offer))
-    }
 
     const promise = this.#peerConnection.setRemoteDescription(offer)
     .then(this.#setRemoteVideo)
     .then(this.#peerConnection.createAnswer.bind(this.#peerConnection))
     .then(this.#setLocalDescription)
-    .then(() => {
-      let {localDescription} = this.#peerConnection
-
-      if (this.#multistream && this.#usePlanB) {
-        localDescription = this.#interop.toUnifiedPlan(localDescription)
-
-        this.#logger.debug('answer::origPlanB->UnifiedPlan', dumpSDP(
-          localDescription))
-      }
-
-      return localDescription.sdp
-    })
+    .then(() => this.#peerConnection.localDescription.sdp)
 
     return asCallback(promise, callback)
   }
@@ -605,7 +558,6 @@ export default class WebRtcPeerCore extends EventEmitter
   #logger
   #mediaConstraints
   #mode
-  #multistream
   #onnegotiationneeded
   #ontrack
   #peerConnection
@@ -751,9 +703,6 @@ export default class WebRtcPeerCore extends EventEmitter
     if (EventEmitter.listenerCount(this, 'icecandidate') || EventEmitter
       .listenerCount(this, 'candidategatheringdone')) {
       if (candidate) {
-        if (this.#multistream && this.#usePlanB)
-          candidate = this.#interop.candidateToUnifiedPlan(candidate);
-
         this.emit('icecandidate', candidate);
         this.#candidategatheringdone = false;
       } else if (!this.#candidategatheringdone) {
