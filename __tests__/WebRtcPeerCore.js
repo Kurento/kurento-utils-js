@@ -52,6 +52,13 @@ test('replaceStream', function()
   return webRtcPeerCore.replaceStream(stream)
 })
 
+test('replaceTrack', function()
+{
+  const webRtcPeerCore = new WebRtcPeerCore("sendonly", { logger });
+
+  return webRtcPeerCore.replaceVideoTrack()
+})
+
 test('send', function()
 {
   const webRtcPeerCore = new WebRtcPeerCore("recvonly", { logger });
