@@ -40,12 +40,12 @@ afterEach(function () {
 });
 
 test("processAnswer with closed PeerConnection", function () {
-  const webRtcPeerCore = new WebRtcPeerCore("recvonly", { logger });
+  webRtcPeer = new WebRtcPeerCore("recvonly", { logger });
 
-  const promise = webRtcPeerCore.ready.then(function () {
-    webRtcPeerCore.dispose();
+  const promise = webRtcPeer.ready.then(function () {
+    webRtcPeer.dispose();
 
-    return webRtcPeerCore.processAnswer();
+    return webRtcPeer.processAnswer();
   });
 
   return expect(promise).rejects.toThrowErrorMatchingInlineSnapshot(
@@ -54,12 +54,12 @@ test("processAnswer with closed PeerConnection", function () {
 });
 
 test("processOffer with closed PeerConnection", function () {
-  const webRtcPeerCore = new WebRtcPeerCore("recvonly", { logger });
+  webRtcPeer = new WebRtcPeerCore("recvonly", { logger });
 
-  const promise = webRtcPeerCore.ready.then(function () {
-    webRtcPeerCore.dispose();
+  const promise = webRtcPeer.ready.then(function () {
+    webRtcPeer.dispose();
 
-    return webRtcPeerCore.processOffer();
+    return webRtcPeer.processOffer();
   });
 
   return expect(promise).rejects.toThrowErrorMatchingInlineSnapshot(
@@ -69,7 +69,7 @@ test("processOffer with closed PeerConnection", function () {
 
 test('replaceStream', function()
 {
-  const webRtcPeerCore = new WebRtcPeerCore("sendonly", { logger });
+  webRtcPeer = new WebRtcPeerCore("sendonly", { logger });
 
   const stream = {
     getTracks()
@@ -82,23 +82,21 @@ test('replaceStream', function()
       return []
     }
   }
+  return webRtcPeer.replaceStream(stream);
+});
 
-  return webRtcPeerCore.replaceStream(stream)
-})
+test("replaceVideoTrack", function () {
+  webRtcPeer = new WebRtcPeerCore("sendonly", { logger });
 
-test('replaceTrack', function()
-{
-  const webRtcPeerCore = new WebRtcPeerCore("sendonly", { logger });
+  return webRtcPeer.replaceVideoTrack();
+});
 
-  return webRtcPeerCore.replaceVideoTrack()
-})
+test("send", function () {
+  webRtcPeer = new WebRtcPeerCore("recvonly", { logger });
 
-test('send', function()
-{
-  const webRtcPeerCore = new WebRtcPeerCore("recvonly", { logger });
+  webRtcPeer.send();
+});
 
-  webRtcPeerCore.send()
-})
 describe("Properties", function () {
   describe("currentFrame", function () {
     test("No remote video stream available", function () {
