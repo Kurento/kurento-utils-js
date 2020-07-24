@@ -816,8 +816,14 @@ export default class WebRtcPeerCore extends EventEmitter
   {
     if(!nonstandard) return
 
-    this.#videoSink = new nonstandard.RTCVideoSink(stream.getVideoTracks()[0])
-    this.#videoSink.addEventListener('frame', this.#onFrame)
+    const videoTracks = stream.getVideoTracks()
+    if(videoTracks.length)
+    {
+      this.#videoSink = new nonstandard.RTCVideoSink(videoTracks[0])
+      this.#videoSink.addEventListener('frame', this.#onFrame)
+    }
+    else
+      this.#videoSink = null
   }
 
   // TODO eslint doesn't fully support private methods, replace arrow function

@@ -32,3 +32,29 @@ test("processOffer with closed PeerConnection", function () {
     `"PeerConnection is closed"`
   );
 });
+
+test('replaceStream', function()
+{
+  const webRtcPeerCore = new WebRtcPeerCore("sendonly", { logger });
+
+  const stream = {
+    getTracks()
+    {
+      return []
+    },
+
+    getVideoTracks()
+    {
+      return []
+    }
+  }
+
+  return webRtcPeerCore.replaceStream(stream)
+})
+
+test('send', function()
+{
+  const webRtcPeerCore = new WebRtcPeerCore("recvonly", { logger });
+
+  webRtcPeerCore.send()
+})
