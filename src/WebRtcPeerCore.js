@@ -195,13 +195,7 @@ export default class WebRtcPeerCore extends EventEmitter
     this.#sendSource = sendSource
     this.#simulcast = simulcast
     this.#usePlanB = usePlanB
-
-    if(videoStream)
-    {
-      this.#videoStream = videoStream
-
-      if(nonstandard) this.#setVideoSink(videoStream)
-    }
+    this.#videoStream = videoStream
 
     this.#peerconnectionConfiguration = recursive({
       iceServers: freeice(freeiceOpts)
@@ -761,22 +755,14 @@ export default class WebRtcPeerCore extends EventEmitter
   }
 
   // TODO eslint doesn't fully support private methods, replace arrow function
-  #setVideoSink = stream =>
+  #setVideoStream = stream =>
   {
-    if(!nonstandard) return
+    this.#videoStream = stream
 
-    const videoTracks = stream.getVideoTracks()
-    if(videoTracks.length)
-    {
-      this.#videoSink = new nonstandard.RTCVideoSink(videoTracks[0])
-      this.#videoSink.addEventListener('frame', this.#onFrame)
-    }
-    else
-      this.#videoSink = null
+    this.emit('setLocalVideo')
   }
 
-  // TODO eslint doesn't fully support private methods, replace arrow function
-  #setVideoStream = stream =>
+  #setRemoteVideo = () =>
   {
     if(this.#videoSink)
     {
@@ -784,19 +770,22 @@ export default class WebRtcPeerCore extends EventEmitter
       this.#videoSink.removeEventListener('frame', this.#onFrame)
     }
 
-    this.#videoStream = stream
+    this.emit('setRemoteVideo')
 
-    this.emit('setLocalVideo')
+    if(!nonstandard) return
 
-    if(stream) return this.#setVideoSink(stream)
+    const [receiver] = this.peerConnection.getReceivers()
+    .filter(filterTracksType, {kind: 'video'})
+    if(receiver)
+    {
+      this.#videoSink = new nonstandard.RTCVideoSink(receiver.track)
+      this.#videoSink.addEventListener('frame', this.#onFrame)
+
+      return
+    }
 
     this.#lastFrame = null
     this.#videoSink = null
-  }
-
-  #setRemoteVideo = () =>
-  {
-    this.emit('setRemoteVideo')
   }
 
   #start = () => {
