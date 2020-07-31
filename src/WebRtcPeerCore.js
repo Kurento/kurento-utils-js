@@ -323,7 +323,7 @@ export default class WebRtcPeerCore extends EventEmitter
    * @function module:kurentoUtils.WebRtcPeer.prototype.dispose
    */
   dispose() {
-    this.#logger.debug('Disposing WebRtcPeer')
+    this.#logger.debug('Disposing WebRtcPeerCore')
 
     const pc = this.#peerConnection
 

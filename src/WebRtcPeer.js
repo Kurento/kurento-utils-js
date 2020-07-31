@@ -28,7 +28,7 @@
  */
 
 import UAParser from 'ua-parser-js'
-import {MediaStream/* , mediaDevices*/} from 'wrtc'
+import {MediaStream} from 'wrtc'
 
 import {WebRtcPeerCore, createCanvas} from './WebRtcPeerCore'
 

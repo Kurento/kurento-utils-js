@@ -435,7 +435,7 @@ describe("Properties", function () {
     // })
     // .then(function()
     // {
-    //   const currentFrame = webRtcPeer.currentFrame;
+    //   const {currentFrame} = webRtcPeer;
 
     //   const x = currentFrame.width / 2;
     //   const y = currentFrame.height / 2;
