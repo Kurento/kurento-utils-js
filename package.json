@@ -75,8 +75,8 @@
   "devDependencies": {
     "@babel/cli": "^7.10.5",
     "@babel/core": "^7.11.0",
+    "@babel/eslint-parser": "^7.11.3",
     "@babel/preset-env": "^7.11.0",
-    "babel-eslint": "^11.0.0-beta.2",
     "babel-jest": "^26.2.2",
     "babel-loader": "^8.1.0",
     "chromedriver": "84.0.1",
