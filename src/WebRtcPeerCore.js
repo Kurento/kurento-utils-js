@@ -563,8 +563,7 @@ export default class WebRtcPeerCore extends EventEmitter
   #videoStream
   #videoSink
 
-  // TODO eslint doesn't fully support private methods, replace arrow function
-  #getMedia = track =>
+  #getMedia(track)
   {
     let method = 'getUserMedia'
     let constraints = this.#mediaConstraints
@@ -594,8 +593,8 @@ export default class WebRtcPeerCore extends EventEmitter
     })
   }
 
-  // TODO eslint doesn't fully support private methods, replace arrow function
-  #getSimulcastInfo = videoStream => {
+  #getSimulcastInfo(videoStream)
+  {
     const videoTracks = videoStream.getVideoTracks();
 
     if (!videoTracks.length) {
@@ -625,8 +624,8 @@ export default class WebRtcPeerCore extends EventEmitter
     ].join('\n');
   }
 
-  // TODO eslint doesn't fully support private methods, replace arrow function
-  #initPeerConnection = () => {
+  #initPeerConnection()
+  {
     if (this.#dataChannels) {
       const {
         id = `WebRtcPeer-${this.#id}`,
@@ -714,8 +713,8 @@ export default class WebRtcPeerCore extends EventEmitter
     }
   }
 
-  // TODO eslint doesn't fully support private methods, replace arrow function
-  #onNewListener = (event, listener) => {
+  #onNewListener(event, listener)
+  {
     const iscandidategatheringdone = event === 'candidategatheringdone'
 
     if (iscandidategatheringdone && event !== 'icecandidate') return
@@ -735,8 +734,8 @@ export default class WebRtcPeerCore extends EventEmitter
     return Promise.all(senders.map(replaceTrack, track))
   }
 
-  // TODO eslint doesn't fully support private methods, replace arrow function
-  #setLocalDescription = localDescription => {
+  #setLocalDescription(localDescription)
+  {
     if (this.#simulcast)
       if (!this.#usePlanB)
         this.#logger.warn('Simulcast is only available in Chrome browser.')
@@ -754,8 +753,7 @@ export default class WebRtcPeerCore extends EventEmitter
     return this.#peerConnection.setLocalDescription(localDescription)
   }
 
-  // TODO eslint doesn't fully support private methods, replace arrow function
-  #setVideoStream = stream =>
+  #setVideoStream(stream)
   {
     this.#videoStream = stream
 
