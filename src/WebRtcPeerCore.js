@@ -694,8 +694,8 @@ export default class WebRtcPeerCore extends EventEmitter
   #onIcecandidate = ({candidate}) => {
     this.#logger.debug('onIcecandidate', candidate)
 
-    if (EventEmitter.listenerCount(this, 'icecandidate') || EventEmitter
-      .listenerCount(this, 'candidategatheringdone')) {
+    if (this.listenerCount('icecandidate')
+    || this.listenerCount('candidategatheringdone')) {
       if (candidate) {
         this.emit('icecandidate', candidate);
         this.#candidategatheringdone = false;
