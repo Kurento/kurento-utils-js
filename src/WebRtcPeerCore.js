@@ -734,7 +734,7 @@ export default class WebRtcPeerCore extends EventEmitter
     return Promise.all(senders.map(replaceTrack, track))
   }
 
-  #setLocalDescription(localDescription)
+  #setLocalDescription = localDescription =>
   {
     if (this.#simulcast)
       if (!this.#usePlanB)
