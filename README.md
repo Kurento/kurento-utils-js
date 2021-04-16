@@ -8,7 +8,7 @@
 
 [![Kurento][KurentoImage]][Kurento]
 
-Copyright 2018 [Kurento]. Licensed under [Apache 2.0 License].
+Copyright 2014-2021 [Kurento]. Licensed under [Apache 2.0 License].
 
 [Kurento]: https://kurento.org
 [KurentoImage]: https://secure.gravatar.com/avatar/21a2a12c56b2a91c8918d5779f1778bf?s=120
@@ -16,6 +16,15 @@ Copyright 2018 [Kurento]. Licensed under [Apache 2.0 License].
 
 The Kurento Utils project contains a set of reusable components that have been
 found useful during the development of the WebRTC applications with Kurento.
+
+> :warning: **Warning**
+>
+> This library is not actively maintained. It was written to simplify the
+> [Kurento Tutorials](https://doc-kurento.readthedocs.io/en/latest/user/tutorials.html)
+> and has several shortcomings for more advanced uses.
+>
+> For real-world applications we recommend to **avoid using this library** and
+> instead to write your JavaScript code directly against the browser’s WebRTC API.
 
 ## Installation instructions
 
@@ -85,14 +94,14 @@ installation and development guides. The [Open API specification], also known as
 
 #### Usage
 
-* [Installation Guide](http://doc-kurento.readthedocs.io/en/stable/user/installation.html)
-* [Compilation Guide](http://doc-kurento.readthedocs.io/en/stable/dev/dev_guide.html#developing-kms)
-* [Contribution Guide](http://doc-kurento.readthedocs.io/en/stable/project/contribute.html)
+* [Installation Guide](https://doc-kurento.readthedocs.io/en/latest/user/installation.html)
+* [Compilation Guide](https://doc-kurento.readthedocs.io/en/latest/dev/dev_guide.html#developing-kms)
+* [Contribution Guide](https://doc-kurento.readthedocs.io/en/latest/project/contribute.html)
 
 #### Issues
 
 * [Bug Tracker](https://github.com/Kurento/bugtracker/issues)
-* [Support](http://doc-kurento.readthedocs.io/en/stable/user/support.html)
+* [Support](https://doc-kurento.readthedocs.io/en/latest/user/support.html)
 
 #### News
 
@@ -106,7 +115,7 @@ All source code belonging to the Kurento project can be found in the
 
 ## Licensing and distribution
 
-Copyright 2018 Kurento
+Copyright 2014-2021 Kurento
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
