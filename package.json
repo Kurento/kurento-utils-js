@@ -64,7 +64,7 @@
     "inherits": "^2.0.0",
     "merge": "^1.2.0",
     "sdp-translator": "^0.1.15",
-    "ua-parser-js": "^0.7.7",
+    "ua-parser-js": "^0.7.30",
     "uuid": "^3.0.0"
   },
   "devDependencies": {
