@@ -3,14 +3,11 @@
 .settings/
 .vscode/
 *~
-bower.json
 junitResult.xml
 lcovResult.lcov
-dist/
-doc/
+docs/
 lib-cov/
 node_modules/
-src/
 target/
 npm-debug.log
 reports/
@@ -19,3 +16,8 @@ reports/
 npm-shrinkwrap.json
 package-lock.json
 yarn.lock
+
+coverage/
+/index.js
+/WebRtcPeer*
+/kurento-utils.*
